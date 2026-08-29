@@ -27,8 +27,31 @@ export const readFields = (raw) =>
       })
   );
 
+const GAP_CLASSES = ["Closeable in this window", "Needs longer", "Needs a different job first"];
+
 /**
- * roadmap.md → { meta, milestones: [{ id, title, done, fields, earns }] }
+ * The optional `## Reachability` block (ADR 0011): `###` headings are gap classes,
+ * their bullets are the target's requirements. Returns [] when the section is absent,
+ * which is the normal case — a reachable target carries no block at all.
+ */
+export const parseReachability = (body) => {
+  const section = body.split(/\n(?=## )/).find((s) => /^## Reachability\s*$/m.test(s));
+  if (!section) return [];
+  return section
+    .split(/\n(?=### )/)
+    .filter((g) => g.startsWith("### "))
+    .map((g) => ({
+      gap: g.match(/^### (.+)$/m)[1].trim(),
+      requirements: [...g.matchAll(/^- (.+)$/gm)].map((m) => m[1].trim()),
+    }))
+    .filter((g) => g.requirements.length > 0);
+};
+
+/** The gap classes ADR 0011 defines, in the order they should be shown. */
+export const gapClasses = () => [...GAP_CLASSES];
+
+/**
+ * roadmap.md → { meta, milestones: [{ id, title, done, fields, earns }], reachability }
  * `fields` keys are the labelled lines verbatim: Start, Due, Where, Deliverable,
  * Evidence, "Depends on", Learning, Completed.
  * `earns` entries are { id, kind: "projected"|"reframed"|"carried", section, text }.
@@ -61,7 +84,7 @@ export const parseRoadmap = (text) => {
         earns,
       };
     });
-  return { meta, milestones };
+  return { meta, milestones, reachability: parseReachability(body) };
 };
 
 /**

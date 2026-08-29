@@ -52,6 +52,6 @@ and a `## Reachability` section listing each requirement under its gap class. Bo
 
 ## Consequences
 
-- The roadmap renderer must display the reachability block and the two-hop framing ([#23](https://github.com/voidforall/your-next-resume/issues/23)).
+- Shipped in [#23](https://github.com/voidforall/your-next-resume/issues/23): the masthead names both hops, and the gap classes render as three cards — "needs a different job first" in red, last and loudest, because it is the reason the plan is two hops. `parse.mjs` exposes `parseReachability`; `tools/validate.mjs` requires `ultimate_target`, `next_hop_horizon` and the section to travel together and rejects an unknown gap class. Fixture: `fixtures/out-of-reach/` (Sam Ortiz, bootcamp grad → Staff ML Engineer).
 - On an overridden run the projection still obeys [ADR 0001](0001-projection-contract.md): a requirement no milestone can earn produces no bullet. The gap section is where that absence is explained.
 - Nothing changes for a reachable target: no extra frontmatter, no extra section, no extra prose.

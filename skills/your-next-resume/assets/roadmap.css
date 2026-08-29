@@ -230,3 +230,33 @@ dd a { color: var(--accent) }
   /* ...but a tick already made must survive the print, so filled means done. */
   input[type=checkbox]:checked { background: var(--ink-3) }
 }
+
+/* ---------------------------------------------- ADR 0011: two hops + gap classes */
+.hops {
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline;
+  margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2);
+}
+.hops b { color: var(--ink); font-weight: 600; }
+.hop-next { color: var(--ink-3); }
+
+.reachability { margin: 24px 0 0; }
+.reachability > h2 {
+  font: 600 11px/1 inherit; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+}
+.gaps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.gap {
+  background: var(--card); border: 1px solid var(--rule); border-top: 3px solid var(--rule);
+  border-radius: 5px; padding: 11px 13px; break-inside: avoid;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.gap h3 { font: 600 12px/1.3 inherit; margin: 0 0 7px; }
+.gap ul { margin: 0; padding: 0 0 0 15px; list-style: disc; }
+.gap li { font-size: 13px; color: var(--ink-2); margin: 0 0 4px; }
+.gap-open { border-top-color: var(--proj-rule); }
+.gap-open h3 { color: var(--proj); }
+.gap-longer { border-top-color: var(--refr-rule); }
+.gap-longer h3 { color: var(--refr); }
+/* The class that explains why the plan is two hops. It does not get to be quiet. */
+.gap-blocked { border-top-color: #8c2f39; background: #fdf2f3; }
+.gap-blocked h3 { color: #8c2f39; }

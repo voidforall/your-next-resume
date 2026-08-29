@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseRoadmap, parseProjection } from "./parse.mjs";
+import { parseRoadmap, parseProjection, gapClasses } from "./parse.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../..");
@@ -311,21 +311,57 @@ const header = (milestones, meta) => {
     ? `<p class="sub">Target read from <code>${esc(meta.target_source)}</code></p>`
     : "";
 
+  // ADR 0011: when the real target is out of reach, the page must never imply this
+  // window reaches it. Name both hops, in the masthead, before anything else.
+  const hops = meta.ultimate_target
+    ? `<p class="hops"><span class="hop-now">This window →
+         <b>${esc(meta.target || "the next role")}</b></span>
+       <span class="hop-next">Then → <b>${esc(meta.ultimate_target)}</b>${
+         meta.next_hop_horizon ? `, ${esc(meta.next_hop_horizon)}` : ""
+       }</span></p>`
+    : "";
+
   return `<header>
   <p class="eyebrow">Roadmap${meta.generated ? ` · generated ${esc(fmtDate(meta.generated))}` : ""}</p>
   <h1>${esc(meta.target || "Roadmap")}</h1>
   <p class="sub">${esc(sub)}</p>
   ${source}
+  ${hops}
   <div class="meter"><div class="bar"><i style="width:${total ? (done / total) * 100 : 0}%"></i></div><b class="tally">${done} of ${total} done</b></div>
   ${HONESTY_NOTE}
   ${whereSplit(milestones, meta)}
 </header>`;
 };
 
+/**
+ * ADR 0011's gap classification. "Needs a different job first" is the class that must not
+ * be quiet — it is the reason the plan is two hops — so it is rendered last and loudest.
+ */
+const reachabilityBlock = (groups) => {
+  if (groups.length === 0) return "";
+  const order = gapClasses();
+  const sorted = [...groups].sort(
+    (a, b) => (order.indexOf(a.gap) + 1 || 99) - (order.indexOf(b.gap) + 1 || 99)
+  );
+  const cls = (gap) =>
+    gap === "Needs a different job first" ? "gap-blocked" : gap === "Needs longer" ? "gap-longer" : "gap-open";
+  return `<section class="reachability">
+  <h2>What the target asks for</h2>
+  <div class="gaps">${sorted
+    .map(
+      (g) => `<div class="gap ${cls(g.gap)}">
+      <h3>${esc(g.gap)}</h3>
+      <ul>${g.requirements.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>
+    </div>`
+    )
+    .join("")}</div>
+</section>`;
+};
+
 /** Inlined assets must not be able to close their own tag. */
 const inlineSafe = (text) => text.replace(/<\/(script|style)/gi, "<\\/$1");
 
-const page = ({ milestones, meta, resumeOrder = [] }) => {
+const page = ({ milestones, meta, resumeOrder = [], reachability = [] }) => {
   const css = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.css"), "utf8"));
   const js = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.client.js"), "utf8"));
   const title = `Roadmap — ${meta.target || "projection"}${meta.window_end ? `, by ${fmtDate(meta.window_end)}` : ""}`;
@@ -344,6 +380,7 @@ ${css}
 <body>
 <div class="wrap">
 ${header(milestones, meta)}
+${reachabilityBlock(reachability)}
 ${timelineView(milestones)}
 ${bulletsView(milestones, resumeOrder)}
 </div>
@@ -403,12 +440,12 @@ const main = (argv) => {
     throw new Error(`cannot read roadmap "${input}": ${err.message}`);
   }
 
-  const { meta, milestones } = parseRoadmap(text);
+  const { meta, milestones, reachability } = parseRoadmap(text);
   validate(milestones, input);
 
   mkdirSync(dirname(output), { recursive: true });
   const resumeOrder = readResumeOrder(input, projection);
-  writeFileSync(output, page({ milestones, meta, resumeOrder }), "utf8");
+  writeFileSync(output, page({ milestones, meta, resumeOrder, reachability }), "utf8");
   process.stdout.write(`✓ ${output} — ${milestones.length} milestones, timeline + by-resume-line\n`);
 };
 

@@ -20,10 +20,12 @@ import {
   splitFrontmatter,
   parseRoadmap,
   parseProjection,
+  gapClasses,
 } from "../skills/your-next-resume/scripts/parse.mjs";
 
 const SKILL = "skills/your-next-resume/SKILL.md";
-const ROADMAP = "fixtures/alex-moreau/roadmap.md";
+const FIXTURES = ["fixtures/alex-moreau", "fixtures/out-of-reach"];
+// The DOCX fixture mirrors the Alex Moreau resume, so it is checked against that projection.
 const PROJECTION = "fixtures/alex-moreau/projection.md";
 const EXTRACTOR = "skills/your-next-resume/scripts/docx-to-text.mjs";
 const DOCX = "fixtures/docx/sample-resume.docx";
@@ -70,8 +72,10 @@ async function validateSkill(path) {
     fail(path, "compatibility exceeds 500 characters");
 }
 
-async function validateFixture(roadmapPath, projectionPath) {
-  const { meta, milestones } = parseRoadmap(await readFile(roadmapPath, "utf8"));
+async function validateFixture(dir) {
+  const roadmapPath = `${dir}/roadmap.md`;
+  const projectionPath = `${dir}/projection.md`;
+  const { meta, milestones, reachability } = parseRoadmap(await readFile(roadmapPath, "utf8"));
   const { meta: projectionMeta, sections } = parseProjection(await readFile(projectionPath, "utf8"));
 
   const { window_start: start, window_end: end } = meta;
@@ -111,6 +115,19 @@ async function validateFixture(roadmapPath, projectionPath) {
       }
     }
   }
+
+  // ADR 0011: the out-of-reach fields travel together, or the page half-tells the story.
+  if (meta.ultimate_target) {
+    if (!meta.next_hop_horizon)
+      fail(roadmapPath, "`ultimate_target` is set but `next_hop_horizon` is missing");
+    if (reachability.length === 0)
+      fail(roadmapPath, "`ultimate_target` is set but there is no `## Reachability` section");
+  } else if (reachability.length > 0) {
+    fail(roadmapPath, "a `## Reachability` section is present but `ultimate_target` is not set");
+  }
+  for (const group of reachability)
+    if (!gapClasses().includes(group.gap))
+      fail(roadmapPath, `unknown gap class "${group.gap}" — expected one of: ${gapClasses().join(", ")}`);
 
   // ADR 0001: a headline reframe must keep the wording it replaced too, and its
   // `Was:` has nowhere to live except frontmatter (ADR 0002).
@@ -160,7 +177,7 @@ function validateDocx(docxPath, notDocxPath) {
 }
 
 await validateSkill(SKILL);
-await validateFixture(ROADMAP, PROJECTION);
+for (const dir of FIXTURES) await validateFixture(dir);
 validateDocx(DOCX, PROJECTION);
 
 if (problems.length) {
