@@ -23,6 +23,10 @@ Operative rules, distilled from ADR 0001–0004. Full reasoning lives in the rep
 6. **Prefer work doable inside the user's current job.** Look for milestones sourced from work hours — scope taken at work, an internal migration, docs, mentoring, an internal talk — before proposing evening projects. Label every milestone `Where: At work` or `Where: Own time`, and respect the capacity the user gave at intake when deciding how many own-time milestones to propose.
 7. **The Stamp is layered** — header band, per-bullet marks, and PDF metadata. Never omit a layer that the environment can support.
 
+## Intake
+
+Read the Current Resume by the ladder in [ADR 0009](../../../docs/adr/0009-resume-intake.md): agent reads the file where it can, `scripts/docx-to-text.mjs` for DOCX, direct read for MD/TXT, paste as the last resort. Then **always** write `projection.md` and show it back for correction before planning anything against it. No resume: a short interview, about five questions, producing the same file.
+
 ## Refusals
 
 Decline exactly these, and offer instead an honest present-day resume or a shorter window:
