@@ -195,18 +195,37 @@ const renderSections = (sections) => {
   return out.join("\n");
 };
 
-const renderHeader = (meta) =>
-  [
+/**
+ * `side` is "today" or "projection". A headline reframe is marked like any other
+ * reframe (ADR 0001): the projection shows the new wording tagged, with the original
+ * beneath; the today panel shows the original untagged.
+ */
+const renderHeader = (meta, side) => {
+  const reframed = Boolean(meta.headline_was && meta.headline_was !== meta.headline);
+  const headline = side === "today" && reframed ? meta.headline_was : meta.headline;
+  const mark =
+    reframed && side === "projection"
+      ? `<span class="tag headline-tag">Reframed</span>`
+      : "";
+  const was =
+    reframed && side === "projection"
+      ? `            <p class="was headline-was"><b>Was:</b> ${esc(meta.headline_was)}</p>`
+      : "";
+  return [
     `        <div class="hdr">`,
     `          <div>`,
     `            <h1 class="name">${esc(meta.name)}</h1>`,
-    meta.headline ? `            <p class="headline">${esc(meta.headline)}</p>` : "",
+    headline
+      ? `            <p class="headline${reframed && side === "projection" ? " is-reframed" : ""}">${esc(headline)}${mark}</p>`
+      : "",
+    was,
     `          </div>`,
     meta.contact ? `          <p class="contact">${esc(meta.contact)}</p>` : "",
     `        </div>`,
   ]
     .filter(Boolean)
     .join("\n");
+};
 
 /** ADR 0003's Stamp band, worded exactly as the ADR words it. */
 const renderStamp = (targetDate) =>
@@ -219,7 +238,7 @@ const renderStamp = (targetDate) =>
 
 const renderPage = ({ meta, sections, stamp }) =>
   [
-    renderHeader(meta),
+    renderHeader(meta, stamp ? "projection" : "today"),
     stamp ? renderStamp(stamp) : "",
     renderSections(sections),
   ]

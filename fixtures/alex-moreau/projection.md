@@ -1,6 +1,7 @@
 ---
 name: Alex Moreau
 headline: Machine Learning Engineer — Distributed Training
+headline_was: Senior Backend Engineer
 contact: alex@example.com · github.com/amoreau · Berlin
 ---
 

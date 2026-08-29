@@ -29,6 +29,10 @@ A progress meter reads "n of 12 done". Directly beneath it, permanently:
 
 ADR 0002 made the file the source of truth. The page must say so rather than let a tick imply a save it cannot perform.
 
+### Section order in the by-resume-line view
+
+Sections follow the resume's own order, read from `projection.md` when it is available — named with `--projection`, or found beside the roadmap. `Header` leads, since that is where it sits on the resume; sections the projection does not define keep due-date order at the end. Without `projection.md` the whole view falls back to due-date order.
+
 ### Print and density
 
 Prints to A4; twelve milestones came to four pages. Checkboxes render as empty squares so a printed roadmap is tickable by hand. The timeline groups by month divider, which is what keeps a long roadmap navigable — the density limit is the number of milestones a person will act on, not a layout limit.

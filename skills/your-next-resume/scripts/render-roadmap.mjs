@@ -13,10 +13,10 @@
  * schema truth (ADR 0002) — this file never reads markdown structure itself.
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseRoadmap } from "./parse.mjs";
+import { parseRoadmap, parseProjection } from "./parse.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../..");
@@ -233,9 +233,25 @@ const bulletCard = (bullet) => {
 </div>`;
 };
 
-const bulletsView = (milestones) => {
+/**
+ * Section order follows the resume itself when projection.md is available — the roadmap
+ * should read in the order of the document it earns. `Header` leads, since that is where
+ * it sits on the resume. Sections the projection does not define keep due-date order, at
+ * the end. Without projection.md, everything falls back to due-date order.
+ */
+const orderSections = (found, resumeOrder) => {
+  if (resumeOrder.length === 0) return found;
+  const rank = (name) => {
+    if (name === "Header") return -1;
+    const i = resumeOrder.findIndex((s) => s === name || s.startsWith(name));
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+  };
+  return [...found].sort((a, b) => rank(a) - rank(b) || found.indexOf(a) - found.indexOf(b));
+};
+
+const bulletsView = (milestones, resumeOrder = []) => {
   const bullets = indexBullets(milestones);
-  const sections = [...new Set(bullets.map((b) => b.section))];
+  const sections = orderSections([...new Set(bullets.map((b) => b.section))], resumeOrder);
   const groups = sections
     .map((name) => {
       const inSection = bullets
@@ -309,7 +325,7 @@ const header = (milestones, meta) => {
 /** Inlined assets must not be able to close their own tag. */
 const inlineSafe = (text) => text.replace(/<\/(script|style)/gi, "<\\/$1");
 
-const page = ({ milestones, meta }) => {
+const page = ({ milestones, meta, resumeOrder = [] }) => {
   const css = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.css"), "utf8"));
   const js = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.client.js"), "utf8"));
   const title = `Roadmap — ${meta.target || "projection"}${meta.window_end ? `, by ${fmtDate(meta.window_end)}` : ""}`;
@@ -329,7 +345,7 @@ ${css}
 <div class="wrap">
 ${header(milestones, meta)}
 ${timelineView(milestones)}
-${bulletsView(milestones)}
+${bulletsView(milestones, resumeOrder)}
 </div>
 
 <nav class="switch">
@@ -348,16 +364,36 @@ ${js}
 
 /* ---------------------------------------------------------------------- main */
 
-const usage = "usage: node render-roadmap.mjs [roadmap.md] <out.html>";
+const usage =
+  "usage: node render-roadmap.mjs [roadmap.md] <out.html> [--projection <projection.md>]";
 
 const readArgs = (argv) => {
-  if (argv.length === 1) return { input: DEFAULT_INPUT, output: resolve(argv[0]) };
-  if (argv.length === 2) return { input: resolve(argv[0]), output: resolve(argv[1]) };
+  const rest = [];
+  let projection = null;
+  for (let i = 0; i < argv.length; i += 1) {
+    if (argv[i] === "--projection") {
+      projection = argv[i + 1] ? resolve(argv[i + 1]) : null;
+      if (!projection) throw new Error(`--projection needs a path\n${usage}`);
+      i += 1;
+    } else rest.push(argv[i]);
+  }
+  if (rest.length === 1) return { input: DEFAULT_INPUT, output: resolve(rest[0]), projection };
+  if (rest.length === 2) return { input: resolve(rest[0]), output: resolve(rest[1]), projection };
   throw new Error(usage);
 };
 
+/** Section order from projection.md — named explicitly, or found beside the roadmap. */
+const readResumeOrder = (input, explicit) => {
+  const path = explicit ?? resolve(dirname(input), "projection.md");
+  if (!existsSync(path)) {
+    if (explicit) throw new Error(`cannot read projection "${path}"`);
+    return [];
+  }
+  return parseProjection(readFileSync(path, "utf8")).sections.map((s) => s.name);
+};
+
 const main = (argv) => {
-  const { input, output } = readArgs(argv);
+  const { input, output, projection } = readArgs(argv);
   if (!/\.html?$/i.test(output)) throw new Error(`output must be an .html file\n${usage}`);
 
   let text;
@@ -371,7 +407,8 @@ const main = (argv) => {
   validate(milestones, input);
 
   mkdirSync(dirname(output), { recursive: true });
-  writeFileSync(output, page({ milestones, meta }), "utf8");
+  const resumeOrder = readResumeOrder(input, projection);
+  writeFileSync(output, page({ milestones, meta, resumeOrder }), "utf8");
   process.stdout.write(`✓ ${output} — ${milestones.length} milestones, timeline + by-resume-line\n`);
 };
 

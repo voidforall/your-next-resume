@@ -72,7 +72,7 @@ async function validateSkill(path) {
 
 async function validateFixture(roadmapPath, projectionPath) {
   const { meta, milestones } = parseRoadmap(await readFile(roadmapPath, "utf8"));
-  const { sections } = parseProjection(await readFile(projectionPath, "utf8"));
+  const { meta: projectionMeta, sections } = parseProjection(await readFile(projectionPath, "utf8"));
 
   const { window_start: start, window_end: end } = meta;
   if (!start || !end) fail(roadmapPath, "frontmatter needs window_start and window_end");
@@ -111,6 +111,17 @@ async function validateFixture(roadmapPath, projectionPath) {
       }
     }
   }
+
+  // ADR 0001: a headline reframe must keep the wording it replaced too, and its
+  // `Was:` has nowhere to live except frontmatter (ADR 0002).
+  const headerReframe = milestones
+    .flatMap((m) => m.earns)
+    .find((e) => e.kind === "reframed" && e.section === "Header");
+  if (headerReframe && !projectionMeta.headline_was)
+    fail(
+      projectionPath,
+      `${headerReframe.id} reframes the headline, so frontmatter needs \`headline_was:\``
+    );
 
   // ADR 0001: a reframed bullet must keep the wording it replaced.
   for (const s of sections)
