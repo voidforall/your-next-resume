@@ -1,0 +1,201 @@
+/*
+ * The projection visual language — ADR 0003, diff treatment.
+ *
+ * Inlined into the generated HTML by scripts/render-projection.mjs; never linked,
+ * because the deliverable must render with no network access at all.
+ *
+ * Load-bearing, from the #5 spike (spikes/pdf-render/FINDINGS.md):
+ *   - `print-color-adjust: exact` on the Stamp band and every tinted row. Without it a
+ *     Cmd+P print silently drops the tints and the band's background, leaving the band's
+ *     white text as invisible white-on-white — exactly the accidental-mistaking failure
+ *     ADR 0001 section 5 exists to prevent.
+ *   - No remote web fonts. System stacks only: serif body, sans metadata, mono gutters.
+ */
+
+:root {
+  --ink: #16191d;
+  --ink-2: #3f464f;
+  --ink-3: #6b737e;
+  --rule: #d9dde3;
+  --paper: #fff;
+  --desk: #eceef1;
+  --stamp-bg: #2f3b52;
+  --stamp-ink: #fff;
+  --proj: #1c5f45;
+  --proj-bg: #e9f4ee;
+  --proj-rule: #3f8f6b;
+  --refr: #7a4a09;
+  --refr-bg: #fdf3e2;
+  --refr-rule: #c08a2e;
+  --page-w: 210mm;
+  --page-pad-x: 15mm;
+  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  /* Static faces only, never `-apple-system`: on macOS that resolves to the variable SF
+     Pro, which Skia re-emits as 20-odd unnamed Type 3 fonts — 2.6x larger, and nameless
+     to an ATS. Measured: this stack embeds HelveticaNeue as subsetted CID TrueType and
+     removes every Type 3 object from the PDF. */
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  --mono: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font: 14px/1.5 var(--serif);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.shell { max-width: 1500px; margin: 0 auto; padding: 28px 24px 48px }
+
+.diptych { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start }
+
+.panel-label {
+  font: 600 11px/1 var(--sans);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 8px;
+}
+
+.page {
+  background: var(--paper);
+  width: 100%;
+  max-width: var(--page-w);
+  margin: 0 auto;
+  padding: 14mm var(--page-pad-x) 16mm;
+  box-shadow: 0 1px 2px rgba(16, 20, 26, .10), 0 8px 24px rgba(16, 20, 26, .10);
+}
+
+/* ---------- resume typography ---------- */
+
+.hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 11px;
+}
+.name { font: 400 25px/1.15 var(--serif); letter-spacing: -.01em; margin: 0 }
+.headline { font-size: 14px; color: var(--ink-2); margin: 3px 0 0 }
+.contact { font: 11.5px/1.5 var(--sans); color: var(--ink-3); margin: 7px 0 0; text-align: right }
+
+h2 {
+  font: 600 10.5px/1 var(--sans);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 20px 0 9px;
+  break-after: avoid;
+}
+
+.role { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 5px; break-after: avoid }
+.role b { font-weight: 600; font-size: 14px }
+.role span { font: 11.5px/1.5 var(--sans); color: var(--ink-3); white-space: nowrap }
+
+ul { list-style: none; margin: 0 0 14px; padding: 0 }
+li {
+  position: relative;
+  padding: 2px 6px 2px 26px;
+  margin: 0 0 4px;
+  border-radius: 2px;
+  break-inside: avoid;
+}
+
+/* ---------- the Stamp band (ADR 0003) ---------- */
+
+.stamp {
+  background: var(--stamp-bg);
+  color: var(--stamp-ink);
+  margin: 11px calc(-1 * var(--page-pad-x)) 0;
+  padding: 7px var(--page-pad-x);
+  font: 600 9px/1.4 var(--sans);
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  break-inside: avoid;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.stamp em {
+  font-style: normal;
+  white-space: nowrap;
+  opacity: .78;
+  text-transform: none;
+  letter-spacing: .02em;
+  font-weight: 400;
+}
+
+/* ---------- the three kinds of line (ADR 0003 diff treatment) ---------- */
+
+li[data-kind] { --k-ink: var(--ink); --k-bg: transparent; --k-rule: transparent }
+
+li[data-kind=projected] {
+  --k-ink: var(--proj);
+  --k-bg: var(--proj-bg);
+  --k-rule: var(--proj-rule);
+  background: var(--k-bg);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+li[data-kind=reframed] {
+  --k-ink: var(--refr);
+  --k-bg: var(--refr-bg);
+  --k-rule: var(--refr-rule);
+  background: var(--k-bg);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.gutter {
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 12px;
+  font: 700 12px/1.5 var(--mono);
+  color: var(--k-ink);
+}
+
+.meta { float: right; margin-left: 10px }
+
+.tag {
+  font: 600 8.5px/1 var(--sans);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--k-ink);
+  padding: 2px 0;
+  white-space: nowrap;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.was { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; font-style: italic }
+.was b { font-style: normal; font-weight: 600; color: var(--refr) }
+
+/* ---------- print: the Projection panel alone, which is the shipped PDF ---------- */
+
+@page { size: A4; margin: 14mm 15mm 16mm }
+
+@media print {
+  body { background: #fff }
+  .shell { padding: 0; max-width: none }
+  .panel-label, .today-panel { display: none !important }
+  .diptych { display: block }
+  .page { box-shadow: none; padding: 0; max-width: none }
+  /* On screen the band bleeds to the edge of the paper card via a negative margin. In
+     print there is no card: the #5 spike measured that a negative margin does not reach
+     the sheet edge, it is simply clipped to the @page content box, which would leave the
+     band's text jammed against the paper. So the printed band is inset — full content
+     width, its own padding — which is the option that spike recommended. */
+  .stamp { margin: 11px 0 0; padding: 7px 10px }
+  li { break-inside: avoid }
+  h2 { break-after: avoid }
+}
