@@ -1,0 +1,12 @@
+Staff Machine Learning Engineer — Training Infrastructure
+
+You will own the systems that train our models: distributed training at multi-node scale,
+throughput and cost per token, and the tooling other researchers depend on daily.
+
+What we look for
+- Deep experience with distributed training (FSDP, DeepSpeed or equivalent) and the failure
+  modes that come with it.
+- Fluency profiling collective communication and GPU utilisation.
+- A track record of shipping infrastructure other engineers rely on, in the open where possible.
+- Writing that teaches: design docs, postmortems, or public technical writing.
+- Strong systems fundamentals; most of our team came from backend or infra rather than research.
