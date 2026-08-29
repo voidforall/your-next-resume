@@ -4,6 +4,7 @@ target_source: fixtures/alex-moreau/target-jd.txt
 window_start: 2026-09-01
 window_end: 2027-02-28
 generated: 2026-08-29
+own_time_capacity: evenings and weekends
 ---
 
 # Roadmap — Staff Machine Learning Engineer
@@ -13,6 +14,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-09-01
 - **Due:** 2026-10-15
+- **Where:** Own time
 - **Deliverable:** Public repo training a small LM across 4 GPUs with FSDP, benchmarks and a written teardown.
 - **Evidence:** `github.com/amoreau/fsdp-harness` — README with benchmark table
 - **Depends on:** —
@@ -29,6 +31,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-09-01
 - **Due:** 2026-09-12
+- **Where:** At work
 - **Deliverable:** Pull the actual pipeline count and setup-time delta from internal dashboards.
 - **Evidence:** Numbers sourced from the internal migration retro
 - **Depends on:** —
@@ -43,6 +46,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-10-16
 - **Due:** 2026-11-06
+- **Where:** Own time
 - **Deliverable:** Profiling write-up: where the all-reduce time actually goes at 4 and 8 GPUs.
 - **Evidence:** `github.com/amoreau/fsdp-harness/docs/profiling.md`
 - **Depends on:** M1
@@ -58,6 +62,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-10-20
 - **Due:** 2026-12-12
+- **Where:** Own time
 - **Deliverable:** Gradient-checkpointing fix, from issue triage to merged PR.
 - **Evidence:** Merged pull request in the upstream repository
 - **Depends on:** M1
@@ -72,6 +77,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-12-01
 - **Due:** 2027-02-14
+- **Where:** Own time
 - **Deliverable:** Long-form post drawn from M1 and M3.
 - **Evidence:** Published post with a public URL
 - **Depends on:** M3
@@ -86,6 +92,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-09-15
 - **Due:** 2026-11-30
+- **Where:** At work
 - **Deliverable:** Six sessions, notes published to the internal wiki.
 - **Evidence:** Internal wiki page with session notes and attendance
 - **Depends on:** —
@@ -101,6 +108,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-11-01
 - **Due:** 2027-01-20
+- **Where:** At work
 - **Deliverable:** Own serving latency for the routing model end to end.
 - **Evidence:** Service ownership recorded in the team's on-call rota
 - **Depends on:** —
@@ -115,6 +123,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-09-05
 - **Due:** 2026-09-19
+- **Where:** At work
 - **Deliverable:** Recover the throughput and cost numbers from the 2021 rollout.
 - **Evidence:** Figures confirmed against the archived rollout report
 - **Depends on:** —
@@ -129,6 +138,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-11-10
 - **Due:** 2027-01-09
+- **Where:** Own time
 - **Deliverable:** Reproduction repo with results table against the published numbers.
 - **Evidence:** `github.com/amoreau/repro-<paper>` with results table
 - **Depends on:** M1
@@ -143,6 +153,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2027-01-05
 - **Due:** 2027-02-20
+- **Where:** Own time
 - **Deliverable:** 25-minute talk at a local ML meetup, slides published.
 - **Evidence:** Meetup event listing plus published slides
 - **Depends on:** M5
@@ -157,6 +168,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2026-12-15
 - **Due:** 2027-02-20
+- **Where:** Own time
 - **Deliverable:** Two further merged PRs, at least one non-trivial.
 - **Evidence:** Two merged pull requests
 - **Depends on:** M4
@@ -171,6 +183,7 @@ generated: 2026-08-29
 - [ ] done
 - **Start:** 2027-02-15
 - **Due:** 2027-02-26
+- **Where:** Own time
 - **Deliverable:** Final pass over the projection once the evidence exists.
 - **Evidence:** The finished projection PDF
 - **Depends on:** M1,M4,M5

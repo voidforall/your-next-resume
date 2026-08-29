@@ -98,8 +98,12 @@ async function validateFixture(roadmapPath, projectionPath) {
   for (const m of milestones) {
     const at = `${roadmapPath} ${m.id}`;
     if (!m.hasCheckbox) fail(at, "missing `- [ ] done` checkbox");
-    for (const req of ["Start", "Due", "Deliverable", "Evidence", "Depends on", "Completed"])
+    for (const req of ["Start", "Due", "Where", "Deliverable", "Evidence", "Depends on", "Completed"])
       if (!(req in m.fields)) fail(at, `missing **${req}:**`);
+
+    // ADR 0008: every milestone declares where the work happens.
+    if (m.fields.Where && !["At work", "Own time"].includes(m.fields.Where))
+      fail(at, `Where must be "At work" or "Own time", got "${m.fields.Where}"`);
 
     for (const dateField of ["Start", "Due"]) {
       const d = m.fields[dateField];

@@ -20,7 +20,8 @@ Operative rules, distilled from ADR 0001–0004. Full reasoning lives in the rep
    **Never projectable:** a new title, a new employer, a promotion, headcount or reports, compensation, degrees, or any achievement attributable to a company the user does not work at.
    The test: *could the user make this true by themselves, inside the window?*
 5. **A reframe may not add a fact.** Wording, emphasis and order may change. A new metric, technology or scope may not appear. Every reframed bullet keeps its original text in a `Was:` line.
-6. **The Stamp is layered** — header band, per-bullet marks, and PDF metadata. Never omit a layer that the environment can support.
+6. **Prefer work doable inside the user's current job.** Look for milestones sourced from work hours — scope taken at work, an internal migration, docs, mentoring, an internal talk — before proposing evening projects. Label every milestone `Where: At work` or `Where: Own time`, and respect the capacity the user gave at intake when deciding how many own-time milestones to propose.
+7. **The Stamp is layered** — header band, per-bullet marks, and PDF metadata. Never omit a layer that the environment can support.
 
 ## Refusals
 

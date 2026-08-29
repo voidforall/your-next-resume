@@ -72,6 +72,7 @@ Field rules:
 | `## M<n> — <title>` | Yes | id unique, sequential; title is a verb phrase |
 | `- [ ] done` | Yes | `- [x]` once the Evidence exists |
 | `Start:` / `Due:` | Yes | ISO dates, both inside the window |
+| `Where:` | Yes | `At work` or `Own time` — added by [ADR 0008](0008-where-the-work-happens.md) |
 | `Deliverable:` | Yes | what gets built, written or published |
 | `Evidence:` | Yes | third-party-checkable artifact; "learned X" is not Evidence |
 | `Depends on:` | Yes | Milestone ids or `—`; must reference existing ids, no cycles |
@@ -109,5 +110,6 @@ Every projected bullet id unique; every Milestone has non-empty `Evidence`; ever
 
 - The renderers (#8, #9) read ids, not text, to draw the bullet↔milestone link.
 - The labelled-line format is additive: the at-risk dependency marker left un-taken in ADR 0001 can be added later as one more field without breaking existing files.
+- Frontmatter also carries optional `own_time_capacity` ([ADR 0008](0008-where-the-work-happens.md)).
 - **Absolute dates only means there is no effort model in the schema.** Reachability (#10) therefore cannot be judged from hours-versus-capacity; it has to be judged from the milestone count and calendar span, or #10 must introduce its own field. Flagged on that ticket.
 - A check-in command remains possible without schema change: it would diff `Evidence` against reality and set `- [x]` plus `Completed:`.
