@@ -6,7 +6,7 @@
   Print CSS prints ONLY the Projection panel, as the real resume PDF would.
   Constraints from the #5 spike: no web fonts, print-color-adjust: exact, @page margins, break-inside.
 -->
-<html lang="en" data-variant="ledger">
+<html lang="en" data-variant="diff">
 <head>
 <meta charset="utf-8">
 <title>PROJECTION — Alex Moreau — target state 28 Feb 2027 — not a record of experience</title>
@@ -63,12 +63,12 @@
   /* ---------- the stamp ---------- */
   .stamp{
     background:var(--stamp-bg);color:var(--stamp-ink);margin:11px -15mm 0;padding:7px 15mm;
-    font:600 10px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-    letter-spacing:.055em;text-transform:uppercase;
-    display:flex;justify-content:space-between;gap:14px;
+    font:600 9px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    letter-spacing:.035em;text-transform:uppercase;
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
-  .stamp em{font-style:normal;opacity:.78;text-transform:none;letter-spacing:.02em;font-weight:400}
+  .stamp em{font-style:normal;white-space:nowrap;opacity:.78;text-transform:none;letter-spacing:.02em;font-weight:400}
   .today .stamp{display:none}
 
   /* ---------- bullet kinds: shared ---------- */
@@ -223,7 +223,7 @@
           <p class="contact">alex@example.com<br>github.com/amoreau · Berlin</p>
         </div>
         <div class="stamp">
-          <span>Projection — target state 28 Feb 2027</span>
+          <span>Projected state · 28 Feb 2027 — earned only if the roadmap is completed</span>
           <em>Not a record of experience</em>
         </div>
 
@@ -285,7 +285,7 @@
   };
   document.querySelectorAll('.bar button').forEach(b =>
     b.addEventListener('click', () => set(b.dataset.v)));
-  set(new URL(location).searchParams.get('variant') || 'ledger');
+  set(new URL(location).searchParams.get('variant') || 'diff');
 </script>
 </body>
 </html>
