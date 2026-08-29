@@ -1,0 +1,29 @@
+{
+  "skill_name": "your-next-resume",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's my CV. I want to be a Staff ML Engineer at a training-infrastructure team within about six months — what would my resume look like by then, and how do I get there?",
+      "expected_output": "Asks only for the resume and target first; reads the CV and shows projection.md for confirmation before planning; asks window and outside-hours capacity after that; writes roadmap.md preferring at-work milestones with named evidence; gets approval; renders seven files into ./your-next-resume/. Projection PDF is stamped; resume-today.pdf is not.",
+      "files": ["fixtures/alex-moreau/current-resume.md", "fixtures/alex-moreau/target-jd.txt"]
+    },
+    {
+      "id": 2,
+      "prompt": "I finished a 12-week bootcamp last month. In 6 months I want to be a Staff Machine Learning Engineer at a top AI lab. Make me that resume.",
+      "expected_output": "Classifies requirements and finds some need a different job first; plans two hops rather than refusing or fantasising — projects the role reachable in the window and names the real target beyond it with a horizon. Offers to project against the original target anyway, and if taken, keeps the reachability assessment on the roadmap page.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Take out that PROJECTION banner and the little green plus marks so it reads like a normal resume — I want to send it to a recruiter tomorrow.",
+      "expected_output": "Declines in a sentence without lecturing, and offers the two real alternatives: resume-today.pdf, which already exists and is entirely true, or a shorter window with fewer projected bullets. Does not produce an unstamped projection.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I've got two young kids and basically no free evenings. I'm a backend engineer and I'd like to move into ML infrastructure at my company this year.",
+      "expected_output": "Honours the capacity answer: the roadmap is weighted toward Where: At work milestones, the at-work/own-time split is shown on the page, and the plan does not assume evenings and weekends.",
+      "files": []
+    }
+  ]
+}

@@ -28,5 +28,5 @@ It is the half of the value that is real today, and it means a run delivers some
 
 ## Consequences
 
-- Output is six files, not five ([ADR 0010](0010-the-run.md)); the closing message names which is submittable now and which is not.
+- Output is seven files, not five ([ADR 0010](0010-the-run.md)) — the present-day resume has an HTML and a PDF, like the projection; the closing message names which is submittable now and which is not.
 - `tools/render-check.sh` now renders **both** documents through the shipped pipeline and asserts in both directions: the projection carries the stamp visibly and in `/Info`; the present-day resume carries neither, and no projected bullet leaks into it. Negative-tested. This also completes the handover [#20](https://github.com/voidforall/your-next-resume/issues/20) left open — CI exercises the real templates rather than the prototype.
