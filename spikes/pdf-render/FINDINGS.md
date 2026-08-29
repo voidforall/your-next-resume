@@ -207,7 +207,7 @@ parameters either (it also takes `/Title` from `document.title`). So **ADR 0001 
 statement in the PDF's document metadata" cannot be met by the render step alone.**
 
 What does meet it, without adding a dependency:
-[`set-pdf-metadata.mjs`](./set-pdf-metadata.mjs) — ~90 lines of plain Node, no packages. It appends a
+[`skills/your-next-resume/scripts/set-pdf-metadata.mjs`](../../skills/your-next-resume/scripts/set-pdf-metadata.mjs) — ~90 lines of plain Node, no packages. It appends a
 **PDF incremental update**: the original bytes are untouched, a replacement `/Info` object plus a fresh
 xref section and a trailer with `/Prev` are appended. Verified end-to-end:
 
