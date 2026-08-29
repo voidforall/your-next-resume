@@ -204,3 +204,7 @@ li[data-kind=reframed] {
 .headline.is-reframed { color: var(--refr, #7a4a09); }
 .headline .headline-tag { margin-left: 7px; vertical-align: 2px; }
 .headline-was { margin: 3px 0 0; }
+
+/* ADR 0012: the standalone present-day resume — one page, no diptych grid. */
+.single { display: block; max-width: 210mm; margin: 0 auto; }
+.single .page { width: 100%; }

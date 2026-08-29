@@ -25,13 +25,13 @@ Two questions to the first artifact; two checkpoints in the whole run.
 
 ### Output
 
-All five files land in **`./your-next-resume/`** in the working directory: `projection.md`, `roadmap.md`, `roadmap.html`, `projection.html`, `projection.pdf`.
+All six files land in **`./your-next-resume/`** in the working directory: `projection.md`, `roadmap.md`, `roadmap.html`, `projection.html`, `projection.pdf`, and `resume-today.pdf` ([ADR 0012](0012-present-day-resume.md)).
 
 **Re-runs do not clobber.** If the folder already exists, the skill says so and asks whether to regenerate from scratch or re-render from the markdown already there. The user is invited to edit `roadmap.md` by hand — silently overwriting those edits would punish exactly the behaviour the design asks for.
 
 ### The closing message
 
-States, in this order: the five files and where they are; that the PDF is a projection and the roadmap is what makes it true; whether the metadata layer was written, if it was not ([ADR 0005](0005-node-runtime-dependency.md)); and one next action — open `roadmap.html` and start the first milestone. It does not congratulate.
+States, in this order: the six files and where they are, naming which is submittable today and which is not; that the PDF is a projection and the roadmap is what makes it true; whether the metadata layer was written, if it was not ([ADR 0005](0005-node-runtime-dependency.md)); and one next action — open `roadmap.html` and start the first milestone. It does not congratulate.
 
 ### Refusals
 

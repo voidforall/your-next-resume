@@ -27,6 +27,8 @@ Operative rules, distilled from ADR 0001–0004. Full reasoning lives in the rep
 
 1. Ask for the resume and the target job. 2. Read it and write `./your-next-resume/projection.md`. 3. **Show it and invite correction.** 4. Ask the window and the outside-hours capacity. 5. Generate `roadmap.md`. 6. **Show it and get approval.** 7. Render bullets, both HTML pages and the PDF. 8. Close with the files, the caveat, and one next action.
 
+Also render the **present-day resume** (`render-projection.mjs --mode today`): carried + reframed, no projections, no stamp — everything in it is true and it is submittable now ([ADR 0012](../../../docs/adr/0012-present-day-resume.md)).
+
 All output goes to `./your-next-resume/`. If that folder exists, ask before regenerating — never silently overwrite a hand-edited `roadmap.md`. Full sequence: [ADR 0010](../../../docs/adr/0010-the-run.md).
 
 ## Intake

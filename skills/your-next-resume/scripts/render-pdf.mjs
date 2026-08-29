@@ -31,9 +31,9 @@
  * Exit codes: 0 ok (possibly without metadata) · 1 usage · 2 render failed · 3 no browser.
  */
 
-import { execFileSync } from "node:child_process";
-import { accessSync, constants, existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
-import { homedir } from "node:os";
+import { execFileSync, spawn } from "node:child_process";
+import { accessSync, constants, existsSync, mkdirSync, readFileSync, statSync, mkdtempSync, rmSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -44,6 +44,7 @@ const METADATA_SCRIPT = join(HERE, "set-pdf-metadata.mjs");
 const BROWSER_VERSION = /Chrome|Chromium|Edg/;
 const PROBE_TIMEOUT_MS = 10_000;
 const RENDER_TIMEOUT_MS = 120_000;
+const POLL_MS = 150;
 const METADATA_TIMEOUT_MS = 30_000;
 
 const META_FIELDS = ["title", "subject", "author", "keywords", "creator", "producer"];
@@ -231,18 +232,22 @@ const readTargetDate = (html) => {
  * The /Info fields to write. Explicit flags win; anything unset is derived from the page.
  * Every field is passed because set-pdf-metadata.mjs replaces /Info wholesale.
  */
+/**
+ * Only a page that carries the Stamp band gets the projection metadata. The present-day
+ * resume (ADR 0012) is entirely true, so claiming "PROJECTION. Not a record of experience"
+ * in its /Info would be a false mark in the opposite direction.
+ */
 const buildMeta = (html, overrides, engine) => {
   const date = readTargetDate(html);
-  const subject = [
-    "PROJECTION.",
-    ...(date ? [`Target state ${date}.`] : []),
-    STAMP_EARNED,
-    STAMP_NEGATION,
-  ].join(" ");
+  const stamped = /class="stamp"/.test(html) || date !== null;
+  const subject = stamped
+    ? ["PROJECTION.", ...(date ? [`Target state ${date}.`] : []), STAMP_EARNED, STAMP_NEGATION].join(" ")
+    : undefined;
   return {
-    title: readTitle(html) ?? "PROJECTION resume — not a record of experience",
-    subject,
-    keywords: DEFAULT_KEYWORDS,
+    title:
+      readTitle(html) ?? (stamped ? "PROJECTION resume — not a record of experience" : "Resume"),
+    ...(subject ? { subject } : {}),
+    ...(stamped ? { keywords: DEFAULT_KEYWORDS } : {}),
     creator: DEFAULT_CREATOR,
     // /Info is replaced wholesale, so Skia's own /Producer is dropped unless we say
     // what rendered the file. Name the engine rather than leaving the field empty.
@@ -265,22 +270,68 @@ const needsNoSandbox = () =>
  * Chrome reports success on stderr and exits 0, so the file itself is the check.
  */
 const renderPdf = (chrome, htmlPath, pdfPath) => {
+  // A throwaway profile. Without --user-data-dir, headless Chrome opens the user's
+  // default profile — which their running browser already holds — and the render blocks.
+  // Most people have Chrome open, so this is the common case, not the edge one.
+  const profile = mkdtempSync(join(tmpdir(), "ynr-chrome-"));
   const args = [
     "--headless",
     "--no-pdf-header-footer",
+    `--user-data-dir=${profile}`,
+    "--no-first-run",
+    "--disable-extensions",
     ...(needsNoSandbox() ? ["--no-sandbox"] : []),
     `--print-to-pdf=${pdfPath}`,
     pathToFileURL(htmlPath).href,
   ];
+  // Chrome writes the PDF and then, on some machines, does not exit — measured here with
+  // and without --disable-gpu and --headless=new, all three writing a correct PDF and then
+  // hanging until killed. So the finished FILE is the completion signal, not the process:
+  // wait for it to appear and stop growing, then stop the browser ourselves. Waiting on
+  // exit instead would stall for the full timeout and then report failure on a good render.
+  const child = spawn(chrome, args, { stdio: ["ignore", "ignore", "ignore"] });
+  const deadline = Date.now() + RENDER_TIMEOUT_MS;
+  let exited = false;
+  let spawnError = null;
+  child.on("exit", () => { exited = true; });
+  child.on("error", (err) => { spawnError = err; exited = true; });
+
   try {
-    execFileSync(chrome, args, { timeout: RENDER_TIMEOUT_MS, stdio: ["ignore", "ignore", "pipe"] });
-  } catch (err) {
-    throw new Error(`Chrome failed to render: ${err.stderr?.toString().trim() || err.message}`);
+    let lastSize = -1;
+    let stableFor = 0;
+    while (Date.now() < deadline) {
+      execFileSync(process.execPath, ["-e", `setTimeout(()=>{}, ${POLL_MS})`]);
+      if (spawnError) throw new Error(`Chrome failed to start: ${spawnError.message}`);
+
+      const size = existsSync(pdfPath) ? statSync(pdfPath).size : 0;
+      if (size > 0 && size === lastSize) stableFor += 1;
+      else stableFor = 0;
+      lastSize = size;
+
+      if (stableFor >= 2) break;          // written and no longer growing
+      if (exited) break;                  // Chrome finished on its own
+    }
+
+    if (!existsSync(pdfPath) || statSync(pdfPath).size === 0) {
+      throw new Error(
+        `Chrome wrote no PDF at ${pdfPath} within ${RENDER_TIMEOUT_MS / 1000}s`
+      );
+    }
+    return statSync(pdfPath).size;
+  } finally {
+    if (!exited) {
+      child.kill("SIGTERM");
+      setTimeout(() => child.kill("SIGKILL"), 2000).unref?.();
+    }
+    child.unref?.();
+    // Best-effort: the browser we just signalled may still be writing into the profile,
+    // and a cleanup race must never fail a render that succeeded.
+    try {
+      rmSync(profile, { recursive: true, force: true });
+    } catch {
+      /* a temp profile left behind is harmless */
+    }
   }
-  if (!existsSync(pdfPath) || statSync(pdfPath).size === 0) {
-    throw new Error(`Chrome exited 0 but wrote no PDF at ${pdfPath}`);
-  }
-  return statSync(pdfPath).size;
 };
 
 /**

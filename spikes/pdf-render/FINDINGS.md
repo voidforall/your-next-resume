@@ -341,3 +341,20 @@ pdftoppm -png -r 110 out/resume.pdf out/page   # then look at the images
 ```
 
 `out/` is gitignored.
+
+
+## Addendum (2026-08-29, from #15)
+
+**`--print-to-pdf` completing does not mean Chrome exits.** Measured on this machine with the
+user's own Chrome running: headless Chrome wrote a correct PDF in ~1s of CPU and then never
+exited, identically with no extra flags, with `--disable-gpu`, and with `--headless=new` — all
+three killed at a 25 s alarm, all three having written a valid PDF.
+
+Two consequences, both now shipped in `render-pdf.mjs`:
+
+- **Pass `--user-data-dir`.** Without it headless Chrome opens the user's default profile,
+  which their running browser holds. Most people have Chrome open, so this is the common case.
+- **Wait on the output file, not the process.** Poll until the PDF exists and has stopped
+  growing, then stop the browser. Waiting on exit stalls for the whole timeout and then
+  reports failure on a render that actually succeeded — 120 s of nothing, then a wrong error.
+  Profile cleanup must be best-effort: the browser may still be writing into it.
