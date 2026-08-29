@@ -1,0 +1,232 @@
+/*
+  Roadmap page stylesheet — inlined into the generated HTML by scripts/render-roadmap.mjs.
+  ADR 0004 (layout), ADR 0003 (palette: green projected, amber reframed), ADR 0008 (where the work happens).
+  No @import, no web fonts, no url() — the page must open from file:// forever.
+*/
+
+:root {
+  --ink: #16191d;
+  --ink-2: #434a54;
+  --ink-3: #727a85;
+  --rule: #dfe3e8;
+  --bg: #f4f5f7;
+  --card: #fff;
+  --accent: #2f3b52;
+  --done: #8d949e;
+
+  /* ADR 0003 palette — load-bearing for meaning, not decoration. */
+  --proj: #1c5f45;
+  --proj-bg: #e9f4ee;
+  --proj-rule: #3f8f6b;
+  --refr: #7a4a09;
+  --refr-bg: #fdf3e2;
+  --refr-rule: #c08a2e;
+
+  /* ADR 0008 "Where" — deliberately outside the green/amber pair so it can never be
+     read as a projected/reframed signal. Labels are always spelled out as well. */
+  --work: #26426b;
+  --work-bg: #e7eef8;
+  --own: #5a3a86;
+  --own-bg: #f0eafa;
+}
+
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 30px 24px 130px }
+
+code {
+  font: 12.5px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: #eef0f3;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* ---------- masthead ---------- */
+header { border-bottom: 2px solid var(--accent); padding-bottom: 18px; margin-bottom: 26px }
+.eyebrow {
+  font-weight: 600; font-size: 11px; line-height: 1; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 7px;
+}
+h1 { font-weight: 600; font-size: 26px; line-height: 1.2; letter-spacing: -.012em; margin: 0 }
+.sub { color: var(--ink-2); margin: 6px 0 0; font-size: 14px }
+.sub a { color: var(--accent) }
+
+.meter { display: flex; align-items: center; gap: 12px; margin: 16px 0 0 }
+.bar { flex: 1; height: 7px; background: #e3e6ea; border-radius: 99px; overflow: hidden }
+.bar i { display: block; height: 100%; background: var(--proj-rule); width: 0 }
+.meter b { font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap }
+
+.note {
+  margin: 13px 0 0; padding: 8px 11px; background: #fff;
+  border: 1px solid var(--rule); border-left: 3px solid var(--refr-rule);
+  border-radius: 3px; font-size: 12.5px; color: var(--ink-2);
+}
+.note b { color: var(--refr) }
+
+/* ---------- ADR 0008: the at-work / own-time split, in aggregate ---------- */
+.split { margin: 18px 0 0; padding: 12px 14px; background: #fff; border: 1px solid var(--rule); border-radius: 4px }
+.split-head {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline;
+  font-weight: 600; font-size: 11px; line-height: 1; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3);
+}
+.split-head span { letter-spacing: 0; text-transform: none; font-weight: 600; font-size: 12.5px }
+.split-head .k-work { color: var(--work) }
+.split-head .k-own { color: var(--own) }
+.split-bar { display: flex; height: 9px; margin: 9px 0 0; border-radius: 99px; overflow: hidden; background: #e3e6ea }
+.split-bar i { display: block; height: 100% }
+.split-bar .s-work { background: var(--work) }
+.split-bar .s-own { background: var(--own) }
+.split-read { margin: 9px 0 0; font-size: 12.5px; color: var(--ink-2) }
+.split-read b { color: var(--own) }
+.split-cap { margin: 4px 0 0; font-size: 12px; color: var(--ink-3) }
+
+/* ---------- the Where chip, on every card ---------- */
+.where {
+  font-weight: 600; font-size: 10.5px; line-height: 1; letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 7px; border-radius: 3px; white-space: nowrap; flex: none;
+}
+.where.w-work { color: var(--work); background: var(--work-bg); border: 1px solid #cfdcef }
+.where.w-own { color: var(--own); background: var(--own-bg); border: 1px solid #ded1f2 }
+
+/* ---------- milestone card ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 5px;
+  padding: 14px 16px; break-inside: avoid;
+}
+.card.done { opacity: .62 }
+.card-top { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap }
+.card h3 { font-weight: 600; font-size: 15px; line-height: 1.35; margin: 0; flex: 1 1 260px }
+.card.done h3 { text-decoration: line-through; text-decoration-color: var(--done) }
+.mid {
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--ink-3); background: #eef0f3; border-radius: 3px; padding: 4px 6px; flex: none;
+}
+.due { font-size: 12px; color: var(--ink-3); white-space: nowrap; flex: none }
+
+input[type=checkbox] {
+  width: 17px; height: 17px; margin: 1px 0 0;
+  accent-color: var(--proj-rule); cursor: pointer; flex: none;
+}
+
+dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 11px 0 0; font-size: 13px }
+dt {
+  font-weight: 600; color: var(--ink-3); font-size: 11.5px;
+  letter-spacing: .04em; text-transform: uppercase; padding-top: 2px;
+}
+dd { margin: 0; color: var(--ink-2) }
+dd a { color: var(--accent) }
+
+/* ---------- the Earns block ---------- */
+.earns { margin: 11px 0 0; padding: 9px 11px; background: var(--proj-bg); border-radius: 4px }
+.earns + .earns { margin-top: 7px }
+.earns.is-refr { background: var(--refr-bg) }
+.earns p {
+  margin: 0 0 5px; font-weight: 600; font-size: 10.5px; line-height: 1; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--proj);
+}
+.earns.is-refr p { color: var(--refr) }
+.earns ul { margin: 0; padding: 0; list-style: none }
+.earns li { margin: 0 0 4px; font-size: 13px; color: var(--ink); display: flex; gap: 7px }
+.earns li:last-child { margin: 0 }
+.bid {
+  font: 700 10.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--proj); flex: none;
+}
+.earns.is-refr .bid { color: var(--refr) }
+.sect { font-size: 11.5px; color: var(--ink-3) }
+
+/* ---------- view: timeline (default) ---------- */
+[data-view=bullets] .view-timeline { display: none }
+[data-view=timeline] .view-bullets { display: none }
+
+.timeline { position: relative; padding-left: 104px }
+.timeline::before {
+  content: ""; position: absolute; left: 78px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--rule);
+}
+.tl-row { position: relative; margin: 0 0 16px; break-inside: avoid }
+.tl-date {
+  position: absolute; left: -104px; top: 14px; width: 66px; text-align: right;
+  font-weight: 600; font-size: 11.5px; line-height: 1.35; color: var(--ink-3);
+}
+.tl-dot {
+  position: absolute; left: -32px; top: 18px; width: 11px; height: 11px; border-radius: 99px;
+  background: #fff; border: 2px solid var(--proj-rule);
+}
+.tl-row.done .tl-dot { background: var(--proj-rule) }
+.tl-month {
+  position: relative; margin: 22px 0 10px -104px; padding: 5px 0; background: var(--bg);
+  font-weight: 600; font-size: 10.5px; line-height: 1; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-3);
+  break-after: avoid;
+}
+.tl-month:first-child { margin-top: 0 }
+
+/* ---------- view: by resume line ---------- */
+.grp { margin: 0 0 22px }
+.grp > h2 {
+  font-weight: 600; font-size: 11px; line-height: 1; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); break-after: avoid;
+}
+.blt {
+  background: #fff; border: 1px solid var(--rule); border-left: 3px solid var(--proj-rule);
+  border-radius: 4px; padding: 12px 14px; margin: 0 0 12px; break-inside: avoid;
+}
+.blt.is-refr { border-left-color: var(--refr-rule) }
+.blt-txt { font-size: 14px; margin: 0 0 3px }
+.blt-txt .bid { margin-right: 7px }
+.blt.is-refr .bid { color: var(--refr) }
+.blt-meta { font-size: 12px; color: var(--ink-3); margin: 0 0 9px }
+.blt ol { margin: 0; padding: 0; list-style: none }
+.blt ol li {
+  display: flex; gap: 9px; align-items: flex-start; padding: 7px 0 0;
+  border-top: 1px dashed var(--rule); margin-top: 7px; font-size: 13px;
+}
+.blt ol li:first-child { border-top: 0; margin-top: 0 }
+.blt ol .ms-body { flex: 1 1 auto }
+.blt ol b { font-weight: 600 }
+.blt ol .due { margin-left: auto }
+
+/* ---------- view switch ---------- */
+.switch {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 9;
+  background: rgba(22, 25, 29, .94); color: #fff; border-radius: 10px; padding: 7px;
+  display: flex; gap: 5px; align-items: center; box-shadow: 0 6px 24px rgba(0, 0, 0, .28);
+}
+.switch b {
+  font-weight: 600; padding: 0 9px 0 6px; opacity: .55; font-size: 11px;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.switch button {
+  font-size: 13px; line-height: 1; color: #fff; background: transparent; border: 0;
+  padding: 7px 13px; border-radius: 6px; cursor: pointer;
+}
+.switch button[aria-pressed=true] { background: #fff; color: #16191d; font-weight: 600 }
+
+/* ---------- print: A4, and the visible view is what prints ---------- */
+@page { size: A4; margin: 14mm 14mm 16mm }
+
+@media print {
+  body { background: #fff }
+  .wrap { padding: 0; max-width: none }
+  .switch { display: none }
+  .timeline { padding-left: 92px }
+  .tl-date { left: -92px; width: 58px }
+  .tl-month { margin-left: -92px; background: #fff }
+  .card, .blt, .split, .note { box-shadow: none }
+  /* Empty squares so a printed roadmap is tickable by hand (ADR 0004). */
+  input[type=checkbox] {
+    -webkit-appearance: none; appearance: none;
+    border: 1.5px solid var(--ink-3); border-radius: 3px; background: #fff;
+  }
+  /* ...but a tick already made must survive the print, so filled means done. */
+  input[type=checkbox]:checked { background: var(--ink-3) }
+}
