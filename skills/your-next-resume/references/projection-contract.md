@@ -33,6 +33,12 @@ All output goes to `./your-next-resume/`. If that folder exists, ask before rege
 
 Read the Current Resume by the ladder in [ADR 0009](../../../docs/adr/0009-resume-intake.md): agent reads the file where it can, `scripts/docx-to-text.mjs` for DOCX, direct read for MD/TXT, paste as the last resort. Then **always** write `projection.md` and show it back for correction before planning anything against it. No resume: a short interview, about five questions, producing the same file.
 
+## When the target is out of reach
+
+Classify every requirement the target names as **closeable** in the window, **longer**, or **needs a different job first**. Any requirement in the third class — or too many in the second — means out of reach. Then plan **two hops**: project to the role reachable inside the window, and name the real target as the next hop with a rough horizon. Never score readiness out of 100.
+
+If the user overrides, generate against the original target but keep the gap classification on the roadmap page. Full rule: [ADR 0011](../../../docs/adr/0011-reachability.md).
+
 ## Refusals
 
 Decline exactly these, and offer instead an honest present-day resume or a shorter window:

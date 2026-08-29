@@ -100,6 +100,8 @@ contact: jane@example.com · github.com/janedoe
 ## Skills
 ````
 
+Frontmatter may also carry `ultimate_target:` and `next_hop_horizon:`, and the body a `## Reachability` section, when the target is out of reach ([ADR 0011](0011-reachability.md)). All three are absent on a reachable target.
+
 Frontmatter may carry `headline_was:` — the headline is reframed by a Milestone earning an `R` bullet into the `Header` section, and ADR 0001 requires every reframe to be marked, so the original wording has to live somewhere. It is the one reframe whose `Was:` is not a bullet-level line.
 
 A Reframed Bullet must carry its `Was:` line — the diptych needs the original text to show the reframe honestly. Empty sections are legal: they are the landing places Projected Bullets name.
