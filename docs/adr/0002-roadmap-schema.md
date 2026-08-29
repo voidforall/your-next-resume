@@ -61,7 +61,7 @@ generated: 2026-08-29
 
 **Earns**
 
-- `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on FSDP, cutting step time 2.1× over the naive baseline.
+- `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on PyTorch FSDP against a single-GPU baseline.
 - `P2` · *Skills* — PyTorch FSDP, distributed training
 ````
 
@@ -109,6 +109,10 @@ A Reframed Bullet must carry its `Was:` line — the diptych needs the original 
 ### Validation
 
 Every projected bullet id unique; every Milestone has non-empty `Evidence`; every projected bullet names a section that exists in `projection.md`; every reframed bullet has `Was:`; all dates inside the window; `Depends on:` acyclic and resolvable.
+
+### A worked example must not model fabrication
+
+The first version of this example claimed a projected bullet "cutting step time 2.1× over the naive baseline" — a precise figure invented before the work exists. An eval agent flagged that the skill's only concrete example pointed the opposite way from its own contract. A projected bullet names what will be built and measured, not the number the measurement will produce.
 
 ## Consequences
 

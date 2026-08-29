@@ -20,6 +20,10 @@ This does not re-open [ADR 0002](0002-roadmap-schema.md)'s rejection of an effor
 
 **4. The README says nothing about it.** The labelled output and the in-job preference carry the answer. [#13](https://github.com/voidforall/your-next-resume/issues/13) may revisit this when it writes the launch copy.
 
+### Internal evidence counts
+
+*Added 2026-08-29 after eval (#24).* Preferring at-work milestones collided with [ADR 0001](0001-projection-contract.md)'s evidence rule, whose examples are all public — a repo, a merged PR, a published post. Both eval agents hit the contradiction and invented their own answer. Resolved: evidence must be checkable **by someone**, not necessarily by a stranger. Internal work counts when named precisely enough that a colleague could confirm it and a hiring manager could ask about it. The alternative quietly pushes every milestone back into unpaid evenings, which is what this ADR exists to prevent.
+
 ## Consequences
 
 - `roadmap.md` gains a required `Where:` field and an optional `own_time_capacity` frontmatter key — additive, exactly as ADR 0002's labelled-line format was designed to allow.

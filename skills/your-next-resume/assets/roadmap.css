@@ -260,3 +260,11 @@ dd a { color: var(--accent) }
 /* The class that explains why the plan is two hops. It does not get to be quiet. */
 .gap-blocked { border-top-color: #8c2f39; background: #fdf2f3; }
 .gap-blocked h3 { color: #8c2f39; }
+
+/* The only prose that survives from roadmap.md into the page. */
+.plan-note {
+  margin: 18px 0 0; padding: 12px 14px; background: var(--card);
+  border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 4px;
+}
+.plan-note p { margin: 0 0 8px; font-size: 13.5px; color: var(--ink-2); }
+.plan-note p:last-child { margin: 0; }

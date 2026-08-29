@@ -334,6 +334,19 @@ const header = (milestones, meta) => {
 };
 
 /**
+ * The one place free prose survives into the page. Everything else outside the schema is
+ * dropped, so this is where an explanation of the plan — what a constraint cost, what was
+ * assumed — has to live if the user is to see it.
+ */
+const noteBlock = (note) =>
+  note
+    ? `<section class="plan-note">${note
+        .split(/\n{2,}/)
+        .map((para) => `<p>${esc(para.replace(/\n/g, " ").trim())}</p>`)
+        .join("")}</section>`
+    : "";
+
+/**
  * ADR 0011's gap classification. "Needs a different job first" is the class that must not
  * be quiet — it is the reason the plan is two hops — so it is rendered last and loudest.
  */
@@ -361,7 +374,7 @@ const reachabilityBlock = (groups) => {
 /** Inlined assets must not be able to close their own tag. */
 const inlineSafe = (text) => text.replace(/<\/(script|style)/gi, "<\\/$1");
 
-const page = ({ milestones, meta, resumeOrder = [], reachability = [] }) => {
+const page = ({ milestones, meta, resumeOrder = [], reachability = [], note = "" }) => {
   const css = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.css"), "utf8"));
   const js = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.client.js"), "utf8"));
   const title = `Roadmap — ${meta.target || "projection"}${meta.window_end ? `, by ${fmtDate(meta.window_end)}` : ""}`;
@@ -380,6 +393,7 @@ ${css}
 <body>
 <div class="wrap">
 ${header(milestones, meta)}
+${noteBlock(note)}
 ${reachabilityBlock(reachability)}
 ${timelineView(milestones)}
 ${bulletsView(milestones, resumeOrder)}
@@ -440,12 +454,12 @@ const main = (argv) => {
     throw new Error(`cannot read roadmap "${input}": ${err.message}`);
   }
 
-  const { meta, milestones, reachability } = parseRoadmap(text);
+  const { meta, milestones, reachability, note } = parseRoadmap(text);
   validate(milestones, input);
 
   mkdirSync(dirname(output), { recursive: true });
   const resumeOrder = readResumeOrder(input, projection);
-  writeFileSync(output, page({ milestones, meta, resumeOrder, reachability }), "utf8");
+  writeFileSync(output, page({ milestones, meta, resumeOrder, reachability, note }), "utf8");
   process.stdout.write(`✓ ${output} — ${milestones.length} milestones, timeline + by-resume-line\n`);
 };
 

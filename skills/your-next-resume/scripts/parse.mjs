@@ -30,6 +30,20 @@ export const readFields = (raw) =>
 const GAP_CLASSES = ["Closeable in this window", "Needs longer", "Needs a different job first"];
 
 /**
+ * Near-miss headings map to the class they obviously mean. Without this, an unrecognised
+ * heading sorts last — which silently renders "needs a different job first" FIRST and drops
+ * the stray class into the green card. Getting it wrong must never invert the meaning.
+ * `check-output.mjs` still reports the non-canonical spelling.
+ */
+export const canonicalGap = (heading) => {
+  const h = heading.trim().toLowerCase();
+  if (h.startsWith("closeable") || h.startsWith("closable")) return GAP_CLASSES[0];
+  if (h.startsWith("needs longer") || h === "longer" || h.startsWith("longer")) return GAP_CLASSES[1];
+  if (h.startsWith("needs a different job") || h.startsWith("different job")) return GAP_CLASSES[2];
+  return heading.trim();
+};
+
+/**
  * The optional `## Reachability` block (ADR 0011): `###` headings are gap classes,
  * their bullets are the target's requirements. Returns [] when the section is absent,
  * which is the normal case — a reachable target carries no block at all.
@@ -41,7 +55,8 @@ export const parseReachability = (body) => {
     .split(/\n(?=### )/)
     .filter((g) => g.startsWith("### "))
     .map((g) => ({
-      gap: g.match(/^### (.+)$/m)[1].trim(),
+      gap: canonicalGap(g.match(/^### (.+)$/m)[1]),
+      gapWritten: g.match(/^### (.+)$/m)[1].trim(),
       requirements: [...g.matchAll(/^- (.+)$/gm)].map((m) => m[1].trim()),
     }))
     .filter((g) => g.requirements.length > 0);
@@ -84,7 +99,13 @@ export const parseRoadmap = (text) => {
         earns,
       };
     });
-  return { meta, milestones, reachability: parseReachability(body) };
+  const note = body.split(/\n(?=## )/).find((sec) => /^## Note\s*$/m.test(sec));
+  return {
+    meta,
+    milestones,
+    reachability: parseReachability(body),
+    note: note ? note.replace(/^## Note\s*\n/, "").trim() : "",
+  };
 };
 
 /**

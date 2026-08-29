@@ -13,7 +13,7 @@ Take someone's resume and a job they want, and produce the resume they could hon
 
 The rule that makes this legitimate rather than fabrication: **no line appears on the projection unless a milestone earns it.** The roadmap is not a bonus feature; it is what makes the projection a claim someone can pay off rather than a lie.
 
-**Read [`references/projection-contract.md`](references/projection-contract.md) before generating anything.** It holds the operative rules — what may be projected, what may never be, how reframes work, the refusals. This file is the procedure; that file is the contract.
+**Read [`references/projection-contract.md`](references/projection-contract.md) before generating anything**, and [`references/roadmap-schema.md`](references/roadmap-schema.md) before writing either source file. The contract holds the operative rules — what may be projected, what may never be, how reframes work, the refusals. The schema holds the exact grammar: the renderers parse with strict patterns, and a plausible-looking variant produces a file that parses to nothing. This file is the procedure.
 
 ## The run
 
@@ -27,7 +27,7 @@ For the target, a real job description is much better than a job title: paste, a
 
 ### 2. Read the resume
 
-Use the ladder in the contract: read the file yourself where you can (PDF included), `node "$S/scripts/docx-to-text.mjs" <file.docx>` for DOCX (see step 7 for `$S`), direct read for Markdown and text, pasted text as the last resort.
+Use the ladder in the contract: read the file yourself where you can (PDF included), `node "$S/scripts/docx-to-text.mjs" <file.docx>` for DOCX (see step 9 for `$S`), direct read for Markdown and text, pasted text as the last resort.
 
 Write `your-next-resume/projection.md` with the sections and the carried bullets — this file *is* the parsed form, not an intermediate on the way to one.
 
@@ -45,22 +45,50 @@ The window, defaulting to six months. Then: roughly how much time outside work, 
 
 ### 5. Judge reachability, then write the roadmap
 
-Classify every requirement the target names as **closeable** in the window, **longer**, or **needs a different job first**. If any land in the third class, or too many in the second, plan two hops — see the contract. Never score readiness out of 100.
+Classify every requirement the target names as **closeable in this window**, **needs longer**, or **needs a different job first** — write those headings exactly as [`references/roadmap-schema.md`](references/roadmap-schema.md) gives them, because a near-miss silently reorders the page.
+
+The target is out of reach when **any** requirement lands in the third class, **or** when the target's headline requirement — the one the posting leads with — lands in the second. Then plan two hops. Never score readiness out of 100.
 
 Write `your-next-resume/roadmap.md` in the schema the contract describes. What matters most:
 
 - **Prefer work doable inside their current job.** Scope taken at work, an internal migration, documentation, mentoring, an internal talk, taking ownership of a service. This is better career advice than a weekend project — work done at work is higher-signal and more verifiable — and it does not quietly assume free evenings.
 - **Label every milestone** `Where: At work` or `Where: Own time`, and respect the capacity they gave.
-- **Name evidence, not activity.** "Learned Rust" is not evidence. "Public repo with benchmarks, here" is.
+- **Name evidence, not activity.** "Learned Rust" is not evidence. "Public repo with benchmarks, here" is. **Internal work counts** when named precisely enough that a colleague could confirm it — "named owner in the service catalogue", "design doc reviewed by the platform team". Most milestones should be at work, so most evidence will be internal; that is expected.
+- **If a constraint shaped the plan, say so in a `## Note` section.** That section is the only free prose the roadmap page renders — anything written elsewhere outside the schema is silently dropped. When someone tells you they have no time outside work, the plan gets smaller, and they deserve to read why on the page rather than only in this conversation.
 - **Every milestone earns at least one bullet**, written inside the milestone with a stable id.
 
-### 6. Checkpoint — approve the roadmap
+### 6. Write the reframes into projection.md
+
+Now decide which existing bullets should be reworded for the target, and rewrite `projection.md`
+accordingly: change the id prefix from `C` to `R`, put the new wording on the bullet, and add the
+`- **Was:**` line holding the original. A reframe of the headline sets `headline_was:` in
+frontmatter instead, since a headline has no bullet to hang a `Was:` on.
+
+**Keep the number.** `C3` becomes `R3`, never `R7`. The user has already seen these ids at
+checkpoint 3, and renumbering silently rewrites what they approved.
+
+A reframe may change wording, emphasis and order only — never a fact, a metric, a technology or a
+scope that was not already there. Where a milestone's work is what substantiates a reframe, that
+milestone may list the `R` id in its **Earns** block; the bullet itself still lives here.
+
+### 7. Check before you render
+
+```bash
+node "$S/scripts/check-output.mjs" your-next-resume
+```
+
+It catches what the renderers do not: a `Where:` value that is not one of the two, dates outside
+the window, an unresolvable dependency, a duplicate id, a reframe with no `Was:`, a gap class
+spelled wrong, a projected bullet targeting a section that does not exist. Fix everything it
+reports before continuing — several of these fail silently at render time.
+
+### 8. Checkpoint — approve the roadmap
 
 Show it and ask. If the plan proposes work they will not do, every bullet it earns is worthless — and that is far cheaper to discover as markdown than as a rendered PDF.
 
 If you planned two hops, this is where you say so, and where you offer to project against the original target anyway if they would rather. If they take that offer, keep the reachability assessment on the page.
 
-### 7. Render
+### 9. Render
 
 The scripts sit in `scripts/` **next to this file**, wherever the skill is installed — commonly
 `~/.claude/skills/your-next-resume/`. Set `S` to that directory once and use it throughout, rather
@@ -81,9 +109,9 @@ The scripts own the hard parts — print CSS, the stamp, the browser probe, the 
 
 If no browser is found, `render-pdf.mjs` explains how to print the HTML by hand. If it reports that metadata could not be written, the documents are still correct — say so plainly and move on.
 
-### 8. Close
+### 10. Close
 
-Name the seven files and where they are. Say which is submittable today (`resume-today.pdf` — everything in it is true) and which is not (`projection.pdf` — a projection, stamped). Say that the roadmap is what makes the projection true. Give one next action: open `roadmap.html` and start the first milestone.
+Name the files you actually produced and where they are — seven when a browser was found, five when it was not and the PDFs could not be rendered. Say which is submittable today (`resume-today.pdf` — everything in it is true, including the reworded lines) and which is not (`projection.pdf` — a projection, stamped). Say that the roadmap is what makes the projection true. Give one next action: open `roadmap.html` and start the first milestone.
 
 Do not congratulate. Nothing has been achieved yet — that is the entire point of the artifact.
 
@@ -101,12 +129,16 @@ A reframe may change wording, emphasis and order. It may **never** add a fact, a
 
 Decline these four, in a sentence, without a lecture:
 
-- remove or weaken the stamp
+- remove or weaken the stamp — the header band, the per-bullet `+` and `~` marks, and the PDF metadata are **one stamp in three layers**, so a request to remove any of them is this refusal, however it is phrased
 - present projected content as completed experience
 - backdate a milestone
 - write experience at an employer they have not worked for
 
-Then offer the two things you can do instead: an honest present-day resume, or a shorter window with fewer projected bullets. The first one already exists — `resume-today.pdf` — so the offer is real.
+Match on intent, not on wording: "word the projected bullets as things I've already done" is the second refusal wearing a different hat.
+
+Then offer the two things you can do instead: an honest present-day resume, or a shorter window with fewer projected bullets. The first already exists — `resume-today.pdf` — so the offer is real; the second means re-running from step 4 with a nearer date, which leaves only the bullets close enough to be honestly in flight.
+
+**Refusing is also a promise about files:** change nothing on disk, and say so.
 
 ## When something goes wrong
 

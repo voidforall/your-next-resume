@@ -20,7 +20,9 @@ For each requirement the target names, assign a gap class:
 | **Longer** | earnable, but needs more time than the window allows |
 | **Needs a different job first** | cannot be earned from where the user currently sits — you cannot earn "led a team of eight" without a team |
 
-The target is **out of reach** when any requirement falls in the third class, or when too many fall in the second. Qualitative and transparent: the user can argue with a specific line rather than a verdict, and there is no fake precision to attack. Explicitly rejected: a readiness score out of 100 — prior art ([#4](https://github.com/voidforall/your-next-resume/issues/4)) found the same resume scoring 90/74/88 across scanners, so a number would be the first thing critics reach for.
+The target is **out of reach** when **any** requirement falls in the third class, or when the target's **headline** requirement — the one the posting leads with — falls in the second.
+
+*Amended 2026-08-29 after eval (#24).* The original wording was "or when too many fall in the second", which is not a threshold: the same fixture produced a single-hop plan in one run and a two-hop plan in three others. Weighting the headline requirement resolves it in the direction three of four runs took, and it explains itself to the user. Qualitative and transparent: the user can argue with a specific line rather than a verdict, and there is no fake precision to attack. Explicitly rejected: a readiness score out of 100 — prior art ([#4](https://github.com/voidforall/your-next-resume/issues/4)) found the same resume scoring 90/74/88 across scanners, so a number would be the first thing critics reach for.
 
 ### Output: two hops
 

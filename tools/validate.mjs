@@ -16,12 +16,9 @@
 import { readFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { basename, dirname } from "node:path";
-import {
-  splitFrontmatter,
-  parseRoadmap,
-  parseProjection,
-  gapClasses,
-} from "../skills/your-next-resume/scripts/parse.mjs";
+import { splitFrontmatter } from "../skills/your-next-resume/scripts/parse.mjs";
+// One implementation of the schema rules: the same checker the skill ships and runs.
+import { checkOutput } from "../skills/your-next-resume/scripts/check-output.mjs";
 
 const SKILL = "skills/your-next-resume/SKILL.md";
 const FIXTURES = ["fixtures/alex-moreau", "fixtures/out-of-reach"];
@@ -29,7 +26,6 @@ const FIXTURES = ["fixtures/alex-moreau", "fixtures/out-of-reach"];
 const PROJECTION = "fixtures/alex-moreau/projection.md";
 const EXTRACTOR = "skills/your-next-resume/scripts/docx-to-text.mjs";
 const DOCX = "fixtures/docx/sample-resume.docx";
-const REQUIRED = ["Start", "Due", "Where", "Deliverable", "Evidence", "Depends on", "Completed"];
 
 // Each line proves one thing the extractor must not drop: a plain paragraph, the
 // <w:tab/> separator, named and numeric entities, the <w:br/> break, and — the one
@@ -72,81 +68,6 @@ async function validateSkill(path) {
     fail(path, "compatibility exceeds 500 characters");
 }
 
-async function validateFixture(dir) {
-  const roadmapPath = `${dir}/roadmap.md`;
-  const projectionPath = `${dir}/projection.md`;
-  const { meta, milestones, reachability } = parseRoadmap(await readFile(roadmapPath, "utf8"));
-  const { meta: projectionMeta, sections } = parseProjection(await readFile(projectionPath, "utf8"));
-
-  const { window_start: start, window_end: end } = meta;
-  if (!start || !end) fail(roadmapPath, "frontmatter needs window_start and window_end");
-  if (milestones.length === 0) return fail(roadmapPath, "no milestones parsed");
-
-  const ids = new Set(milestones.map((m) => m.id));
-  const sectionNames = sections.map((s) => s.name);
-  const seenBullets = new Set();
-
-  for (const m of milestones) {
-    const at = `${roadmapPath} ${m.id}`;
-    if (!m.title) fail(at, "no title on the heading");
-    for (const req of REQUIRED) if (!(req in m.fields)) fail(at, `missing **${req}:**`);
-
-    // ADR 0008: every milestone declares where the work happens.
-    if (m.fields.Where && !["At work", "Own time"].includes(m.fields.Where))
-      fail(at, `Where must be "At work" or "Own time", got "${m.fields.Where}"`);
-
-    for (const field of ["Start", "Due"]) {
-      const d = m.fields[field];
-      if (d && start && end && (d < start || d > end))
-        fail(at, `${field} ${d} falls outside the window`);
-    }
-
-    for (const dep of m.dependsOn)
-      if (!ids.has(dep)) fail(at, `Depends on unknown milestone ${dep}`);
-
-    if (m.earns.length === 0) fail(at, "earns no bullets");
-    for (const e of m.earns) {
-      if (seenBullets.has(e.id)) fail(at, `duplicate bullet id ${e.id}`);
-      seenBullets.add(e.id);
-      if (e.kind === "projected" && e.section !== "Header") {
-        const known = sectionNames.some((s) => s === e.section || s.startsWith(e.section));
-        if (!known)
-          fail(at, `bullet ${e.id} targets section "${e.section}", which projection.md does not define`);
-      }
-    }
-  }
-
-  // ADR 0011: the out-of-reach fields travel together, or the page half-tells the story.
-  if (meta.ultimate_target) {
-    if (!meta.next_hop_horizon)
-      fail(roadmapPath, "`ultimate_target` is set but `next_hop_horizon` is missing");
-    if (reachability.length === 0)
-      fail(roadmapPath, "`ultimate_target` is set but there is no `## Reachability` section");
-  } else if (reachability.length > 0) {
-    fail(roadmapPath, "a `## Reachability` section is present but `ultimate_target` is not set");
-  }
-  for (const group of reachability)
-    if (!gapClasses().includes(group.gap))
-      fail(roadmapPath, `unknown gap class "${group.gap}" — expected one of: ${gapClasses().join(", ")}`);
-
-  // ADR 0001: a headline reframe must keep the wording it replaced too, and its
-  // `Was:` has nowhere to live except frontmatter (ADR 0002).
-  const headerReframe = milestones
-    .flatMap((m) => m.earns)
-    .find((e) => e.kind === "reframed" && e.section === "Header");
-  if (headerReframe && !projectionMeta.headline_was)
-    fail(
-      projectionPath,
-      `${headerReframe.id} reframes the headline, so frontmatter needs \`headline_was:\``
-    );
-
-  // ADR 0001: a reframed bullet must keep the wording it replaced.
-  for (const s of sections)
-    for (const b of s.bullets)
-      if (b.kind === "reframed" && !b.was)
-        fail(`${projectionPath} ${b.id}`, "reframed bullet has no **Was:** line");
-}
-
 function runExtractor(file) {
   return execFileSync(process.execPath, [EXTRACTOR, file], {
     encoding: "utf8",
@@ -177,7 +98,7 @@ function validateDocx(docxPath, notDocxPath) {
 }
 
 await validateSkill(SKILL);
-for (const dir of FIXTURES) await validateFixture(dir);
+for (const dir of FIXTURES) for (const p of checkOutput(dir)) problems.push(p);
 validateDocx(DOCX, PROJECTION);
 
 if (problems.length) {
