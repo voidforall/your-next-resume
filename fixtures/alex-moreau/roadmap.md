@@ -1,5 +1,5 @@
 ---
-target: Staff Machine Learning Engineer — Training Infrastructure
+target: Machine Learning Platform Engineer — Training Infrastructure
 target_source: fixtures/alex-moreau/target-jd.txt
 window_start: 2026-09-01
 window_end: 2027-02-28
@@ -7,7 +7,7 @@ generated: 2026-08-29
 own_time_capacity: evenings and weekends
 ---
 
-# Roadmap — Staff Machine Learning Engineer
+# Roadmap — Machine Learning Platform Engineer
 
 ## M1 — Ship a multi-GPU training harness
 
@@ -23,7 +23,7 @@ own_time_capacity: evenings and weekends
 
 **Earns**
 
-- `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on PyTorch FSDP, cutting step time 2.1× over the naive baseline.
+- `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on PyTorch FSDP against a single-GPU baseline.
 - `P2` · *Skills* — PyTorch FSDP, distributed training
 
 ## M2 — Reframe the Kubernetes migration with real numbers
@@ -146,7 +146,7 @@ own_time_capacity: evenings and weekends
 
 **Earns**
 
-- `P8` · *Projects* — Reproduced a published training-efficiency result end to end, matching reported numbers within 3%.
+- `P8` · *Projects* — Reproduced a published training-efficiency result end to end.
 
 ## M10 — Give the teardown as a meetup talk
 

@@ -1,42 +1,76 @@
-# your-next-resume
+<h1 align="center">your-next-resume</h1>
 
-Imagine your resume six months from now — and get the roadmap that earns it.
+<p align="center">
+  <b>Imagine your resume six months from now — and get the roadmap that earns it.</b><br>
+  An agent skill. Runs on your machine. Your resume never leaves it.
+</p>
 
-> **Under construction.** The design is settled and recorded; the skill itself is not implemented yet.
-> Installing today gets you a stub. Progress lives on [the map](https://github.com/voidforall/your-next-resume/issues/1).
+<p align="center">
+  <img src="docs/media/diptych.png" alt="Left: today's resume. Right: the projection, with reframed lines in amber and projected lines in green, under a stamp reading PROJECTED STATE · 28 FEB 2027 — EARNED ONLY IF THE ROADMAP IS COMPLETED." width="100%">
+</p>
 
-An agent skill that takes your resume and a job you want, then produces two things:
-
-- a **projection** — your resume as it could read at the end of the window, as a PDF, where every
-  invented line is marked and dated;
-- a **roadmap** — an offline HTML page of dated milestones, where each one names the evidence it
-  produces and the resume line it earns.
-
-No line appears on the projection unless a milestone earns it. That rule is the whole product:
-the projection is a claim, and the roadmap is what makes the claim payable.
-
-## Install
-
-```
+```bash
 npx skills add voidforall/your-next-resume
 ```
 
-Requires Node 18+ and a Chrome-family browser for PDF output. Runs fully offline — your resume
-never leaves your machine.
+Then ask your agent: *"here's my CV and the job I want — what would my resume look like in six months?"*
 
-## Repository
+## The rule
 
-| Path | What's in it |
+**No line appears on the projection unless a milestone earns it.**
+
+Every green line traces to a dated milestone that names the evidence which would prove it — a repo, a merged PR, a design doc your team reviewed. If nothing earns a line, the line is deleted, not softened. That is what separates this from a machine that writes you a flattering lie: the projection is a claim, and the roadmap is what makes it payable.
+
+Amber lines are different: those are true *today*, reworded to speak the target's language, with the original kept underneath. Reframing may never add a fact.
+
+## What you get
+
+Seven files in `./your-next-resume/`:
+
+| | |
 | --- | --- |
-| `skills/your-next-resume/` | the skill: `SKILL.md`, `references/`, `scripts/`, `assets/` |
-| `docs/adr/` | the decisions, with their reasoning |
-| `docs/research/` | prior art, and how skills are packaged and installed |
-| `fixtures/alex-moreau/` | the synthetic demo persona, used as CI input |
-| `spikes/` | throwaway prototypes kept as primary sources |
-| `tools/` | `validate.mjs`, `render-check.sh` — what CI runs |
+| `projection.pdf` | the stamped future-state resume — **not** submittable, and it says so in the band, on every projected line, and in the PDF metadata |
+| `resume-today.pdf` | everything true about you today, retuned for the target — **submittable this afternoon** |
+| `roadmap.html` | the plan, offline and self-contained |
+| `projection.html` · `resume-today.html` | the same two documents on screen |
+| `roadmap.md` · `projection.md` | the source. Yours to edit; re-render any time |
 
-`CONTEXT.md` holds the vocabulary. Start there, then read the ADRs in order.
+<p align="center">
+  <img src="docs/media/roadmap.png" alt="The roadmap page: a dated timeline of milestones, each showing its deliverable, the evidence that would prove it, and the resume line it earns." width="100%">
+</p>
 
-## Licence
+Each milestone says what to build, by when, what evidence proves it, and which resume line it buys. It is labelled **At work** or **Own time**, and the page shows the split — because a plan that quietly assumes your evenings is a plan for people who have evenings.
 
-MIT
+## When the target is out of reach
+
+It will tell you, and plan the first leg instead of promising the whole trip.
+
+<p align="center">
+  <img src="docs/media/out-of-reach.png" alt="A roadmap for a bootcamp graduate: the masthead names this window's reachable role and the eventual target beyond it, above three cards classifying every requirement as closeable, needs longer, or needs a different job first." width="100%">
+</p>
+
+Every requirement in the posting is sorted into *closeable in this window*, *needs longer*, or *needs a different job first* — that last one being the honest reason some jobs are two moves away, not one. No score out of 100; scanners disagree with each other by twenty points on the same file, and a number would only look precise.
+
+## What it won't do
+
+Ask it to take the banner off and it declines:
+
+> I can't take the banner or the `+` marks off — they are the same stamp in three layers, and without them the document reads as a record of work you haven't done yet.
+>
+> The resume you can send tomorrow already exists: `your-next-resume/resume-today.pdf` — no banner, no marks, no projected bullets, and every line on it is true today.
+
+It won't backdate a milestone, write experience at an employer you haven't worked for, or word projected bullets as things you've already done.
+
+## What it isn't
+
+Not an ATS optimiser — those scores are noise. Not a job board. Not a guarantee: a roadmap is a plan, and plans are wrong. It won't make you a Staff engineer in six months if you aren't close, and it will say so rather than print it.
+
+## Requirements
+
+Node 18+ and Chrome, Chromium or Edge for the PDFs. No API keys, no account, no network — everything runs locally, and nothing is uploaded. Without a browser you still get every document, and instructions to print them yourself.
+
+## How it's built
+
+`skills/your-next-resume/` is the skill. [`CONTEXT.md`](CONTEXT.md) is the vocabulary, [`docs/adr/`](docs/adr/) is every decision and why it was made, and [`evals/`](evals/) holds the cases it was tested against — including a no-skill baseline.
+
+MIT.
