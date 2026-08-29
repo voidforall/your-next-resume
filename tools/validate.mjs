@@ -8,43 +8,30 @@
  *    so a broken release would look like an empty repo rather than an error.
  * 2. The fixture roadmap.md / projection.md against the ADR 0002 schema.
  *
- * Exits non-zero with a list of problems. Never mutates anything.
+ * Parsing lives in the skill's scripts/parse.mjs so the schema is read exactly one way.
  */
 import { readFile } from "node:fs/promises";
 import { basename, dirname } from "node:path";
+import {
+  splitFrontmatter,
+  parseRoadmap,
+  parseProjection,
+} from "../skills/your-next-resume/scripts/parse.mjs";
 
 const SKILL = "skills/your-next-resume/SKILL.md";
 const ROADMAP = "fixtures/alex-moreau/roadmap.md";
 const PROJECTION = "fixtures/alex-moreau/projection.md";
+const REQUIRED = ["Start", "Due", "Where", "Deliverable", "Evidence", "Depends on", "Completed"];
 
 const problems = [];
 const fail = (where, msg) => problems.push(`${where}: ${msg}`);
 
-/** Split `---\n...\n---\n` frontmatter from the body. Returns [rawFrontmatter, body]. */
-const splitFrontmatter = (text) => {
-  if (!text.startsWith("---\n")) return [null, text];
-  const end = text.indexOf("\n---", 3);
-  return end === -1 ? [null, text] : [text.slice(4, end), text.slice(end + 4)];
-};
-
-/** Flat `key: value` reader — enough for the fields we validate, no YAML dependency. */
-const readFields = (raw) =>
-  Object.fromEntries(
-    raw
-      .split("\n")
-      .filter((l) => /^[a-z_-]+:/.test(l))
-      .map((l) => {
-        const i = l.indexOf(":");
-        return [l.slice(0, i).trim(), l.slice(i + 1).trim()];
-      })
-  );
-
 async function validateSkill(path) {
   const text = await readFile(path, "utf8");
-  const [raw] = splitFrontmatter(text);
-  if (!raw) return fail(path, "no YAML frontmatter, or it does not start on line 1");
+  if (!text.startsWith("---\n"))
+    return fail(path, "no YAML frontmatter, or it does not start on line 1");
 
-  const f = readFields(raw);
+  const f = splitFrontmatter(text).meta;
   const dir = basename(dirname(path));
 
   if (!f.name) fail(path, "missing `name`");
@@ -61,79 +48,53 @@ async function validateSkill(path) {
     fail(path, "compatibility exceeds 500 characters");
 }
 
-/** Parse `## M<n> — title` sections into {id, title, fields, earns}. */
-const parseMilestones = (text) => {
-  const sections = text.split(/\n(?=## )/).filter((s) => s.startsWith("## M"));
-  return sections.map((s) => {
-    const id = s.match(/^## (M\d+)/)?.[1] ?? "?";
-    const fields = Object.fromEntries(
-      [...s.matchAll(/^- \*\*([A-Za-z ]+):\*\*\s*(.*)$/gm)].map((m) => [m[1].trim(), m[2].trim()])
-    );
-    const earns = [...s.matchAll(/^- `([CRP]\d+)` · \*([^*]+)\* — (.+)$/gm)].map((m) => ({
-      id: m[1], section: m[2].trim(), text: m[3].trim(),
-    }));
-    return { id, fields, earns, hasCheckbox: /^- \[[ x]\] done$/m.test(s) };
-  });
-};
-
 async function validateFixture(roadmapPath, projectionPath) {
-  const roadmap = await readFile(roadmapPath, "utf8");
-  const projection = await readFile(projectionPath, "utf8");
-  const [rawFm] = splitFrontmatter(roadmap);
-  if (!rawFm) return fail(roadmapPath, "no frontmatter");
+  const { meta, milestones } = parseRoadmap(await readFile(roadmapPath, "utf8"));
+  const { sections } = parseProjection(await readFile(projectionPath, "utf8"));
 
-  const meta = readFields(rawFm);
   const { window_start: start, window_end: end } = meta;
   if (!start || !end) fail(roadmapPath, "frontmatter needs window_start and window_end");
-
-  const milestones = parseMilestones(roadmap);
   if (milestones.length === 0) return fail(roadmapPath, "no milestones parsed");
 
   const ids = new Set(milestones.map((m) => m.id));
-  const bulletIds = new Set();
-  const sections = new Set(
-    [...projection.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim())
-  );
+  const sectionNames = sections.map((s) => s.name);
+  const seenBullets = new Set();
 
   for (const m of milestones) {
     const at = `${roadmapPath} ${m.id}`;
-    if (!m.hasCheckbox) fail(at, "missing `- [ ] done` checkbox");
-    for (const req of ["Start", "Due", "Where", "Deliverable", "Evidence", "Depends on", "Completed"])
-      if (!(req in m.fields)) fail(at, `missing **${req}:**`);
+    if (!m.title) fail(at, "no title on the heading");
+    for (const req of REQUIRED) if (!(req in m.fields)) fail(at, `missing **${req}:**`);
 
     // ADR 0008: every milestone declares where the work happens.
     if (m.fields.Where && !["At work", "Own time"].includes(m.fields.Where))
       fail(at, `Where must be "At work" or "Own time", got "${m.fields.Where}"`);
 
-    for (const dateField of ["Start", "Due"]) {
-      const d = m.fields[dateField];
-      if (d && (d < start || d > end)) fail(at, `${dateField} ${d} falls outside the window`);
+    for (const field of ["Start", "Due"]) {
+      const d = m.fields[field];
+      if (d && start && end && (d < start || d > end))
+        fail(at, `${field} ${d} falls outside the window`);
     }
 
-    const deps = (m.fields["Depends on"] ?? "—").trim();
-    if (deps !== "—")
-      for (const dep of deps.split(",").map((d) => d.trim()))
-        if (!ids.has(dep)) fail(at, `Depends on unknown milestone ${dep}`);
+    for (const dep of m.dependsOn)
+      if (!ids.has(dep)) fail(at, `Depends on unknown milestone ${dep}`);
 
     if (m.earns.length === 0) fail(at, "earns no bullets");
     for (const e of m.earns) {
-      if (bulletIds.has(e.id)) fail(at, `duplicate bullet id ${e.id}`);
-      bulletIds.add(e.id);
-      if (e.id.startsWith("P")) {
-        const section = e.section.replace(/^Experience — /, "Experience — ");
-        const known = [...sections].some((s) => s === section || s.startsWith(section));
-        if (!known && section !== "Header")
+      if (seenBullets.has(e.id)) fail(at, `duplicate bullet id ${e.id}`);
+      seenBullets.add(e.id);
+      if (e.kind === "projected" && e.section !== "Header") {
+        const known = sectionNames.some((s) => s === e.section || s.startsWith(e.section));
+        if (!known)
           fail(at, `bullet ${e.id} targets section "${e.section}", which projection.md does not define`);
       }
     }
   }
 
-  // Every reframed bullet in projection.md must carry its original wording.
-  for (const m of projection.matchAll(/^- `(R\d+)` — (.+)$/gm)) {
-    const after = projection.slice(m.index + m[0].length, m.index + m[0].length + 400);
-    if (!/^\s*\n?\s*- \*\*Was:\*\*/.test(after))
-      fail(`${projectionPath} ${m[1]}`, "reframed bullet has no **Was:** line");
-  }
+  // ADR 0001: a reframed bullet must keep the wording it replaced.
+  for (const s of sections)
+    for (const b of s.bullets)
+      if (b.kind === "reframed" && !b.was)
+        fail(`${projectionPath} ${b.id}`, "reframed bullet has no **Was:** line");
 }
 
 await validateSkill(SKILL);
