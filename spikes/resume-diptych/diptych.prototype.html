@@ -1,0 +1,291 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Ticket #8.
+  Three variants of how projected/reframed content is distinguished on the Projection,
+  switchable via ?variant=ledger|blueprint|diff and the floating bar.
+  Print CSS prints ONLY the Projection panel, as the real resume PDF would.
+  Constraints from the #5 spike: no web fonts, print-color-adjust: exact, @page margins, break-inside.
+-->
+<html lang="en" data-variant="ledger">
+<head>
+<meta charset="utf-8">
+<title>PROJECTION — Alex Moreau — target state 28 Feb 2027 — not a record of experience</title>
+<style>
+  :root{
+    --ink:#16191d; --ink-2:#3f464f; --ink-3:#6b737e; --rule:#d9dde3; --paper:#fff;
+    --stamp-bg:#2f3b52; --stamp-ink:#fff;
+    --proj:#1c5f45; --proj-bg:#e9f4ee; --proj-rule:#3f8f6b;
+    --refr:#7a4a09; --refr-bg:#fdf3e2; --refr-rule:#c08a2e;
+    --page-w:210mm;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:#eceef1; color:var(--ink);
+    font:14px/1.5 Georgia,"Iowan Old Style","Times New Roman",serif;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .shell{max-width:1500px;margin:0 auto;padding:28px 24px 120px}
+  .lede{font:13px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink-2);max-width:70ch;margin:0 0 22px}
+  .lede b{color:var(--ink)}
+  .diptych{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .panel-label{
+    font:600 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px
+  }
+  .page{
+    background:var(--paper); width:100%; max-width:var(--page-w); margin:0 auto;
+    padding:14mm 15mm 16mm; box-shadow:0 1px 2px rgba(16,20,26,.10),0 8px 24px rgba(16,20,26,.10);
+  }
+
+  /* ---------- resume typography ---------- */
+  .name{font:400 25px/1.15 Georgia,serif;letter-spacing:-.01em;margin:0}
+  .headline{font-size:14px;color:var(--ink-2);margin:3px 0 0}
+  .contact{
+    font:11.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink-3);margin:7px 0 0
+  }
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+       border-bottom:1px solid var(--rule);padding-bottom:11px}
+  h2{
+    font:600 10.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+    margin:20px 0 9px;break-after:avoid
+  }
+  .role{display:flex;justify-content:space-between;gap:12px;margin:0 0 5px}
+  .role b{font-weight:600;font-size:14px}
+  .role span{font:11.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink-3);white-space:nowrap}
+  ul{list-style:none;margin:0 0 14px;padding:0}
+  li{position:relative;padding:2px 0 2px 15px;margin:0 0 4px;break-inside:avoid}
+  li::before{content:"–";position:absolute;left:2px;color:var(--ink-3)}
+  .skills{font-size:13.5px;color:var(--ink-2)}
+
+  /* ---------- the stamp ---------- */
+  .stamp{
+    background:var(--stamp-bg);color:var(--stamp-ink);margin:11px -15mm 0;padding:7px 15mm;
+    font:600 10px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    letter-spacing:.055em;text-transform:uppercase;
+    display:flex;justify-content:space-between;gap:14px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .stamp em{font-style:normal;opacity:.78;text-transform:none;letter-spacing:.02em;font-weight:400}
+  .today .stamp{display:none}
+
+  /* ---------- bullet kinds: shared ---------- */
+  li[data-kind]{--k-ink:var(--ink);--k-bg:transparent;--k-rule:transparent}
+  li[data-kind=projected]{--k-ink:var(--proj);--k-bg:var(--proj-bg);--k-rule:var(--proj-rule)}
+  li[data-kind=reframed]{--k-ink:var(--refr);--k-bg:var(--refr-bg);--k-rule:var(--refr-rule)}
+  .tag{
+    font:600 8.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--k-ink);
+    border:1px solid var(--k-rule);border-radius:2px;padding:2px 4px;white-space:nowrap;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .was{
+    display:block;font-size:11.5px;color:var(--ink-3);margin-top:3px;
+    font-style:italic
+  }
+  .was b{font-style:normal;font-weight:600;color:var(--refr)}
+  .today .was{display:none}
+
+  /* ---------- VARIANT: ledger ---------- */
+  [data-variant=ledger] .projection li[data-kind=projected],
+  [data-variant=ledger] .projection li[data-kind=reframed]{
+    padding-left:15px;border-left:2px solid var(--k-rule);padding-right:4px;background:none
+  }
+  [data-variant=ledger] .projection li[data-kind=projected]::before,
+  [data-variant=ledger] .projection li[data-kind=reframed]::before{color:var(--k-rule)}
+  [data-variant=ledger] .projection li[data-kind=carried]{border-left:2px solid transparent}
+  [data-variant=ledger] .meta{float:right;margin-left:10px}
+  [data-variant=ledger] .gutter,[data-variant=ledger] .ref{display:none}
+
+  /* ---------- VARIANT: blueprint ---------- */
+  [data-variant=blueprint] .projection li[data-kind=projected]{border-left:2px dashed var(--k-rule);padding-left:15px}
+  [data-variant=blueprint] .projection li[data-kind=reframed]{border-left:2px dotted var(--k-rule);padding-left:15px}
+  [data-variant=blueprint] .projection li[data-kind] .tag{display:none}
+  [data-variant=blueprint] .ref{
+    display:inline;
+    font:600 9.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    vertical-align:super;color:var(--k-ink);margin-left:3px
+  }
+  [data-variant=blueprint] .gutter,[data-variant=blueprint] .meta{display:none}
+  [data-variant=blueprint] .evidence{display:block}
+
+  /* ---------- VARIANT: diff ---------- */
+  [data-variant=diff] .projection li[data-kind=projected],
+  [data-variant=diff] .projection li[data-kind=reframed]{
+    background:var(--k-bg);padding-left:26px;padding-right:6px;border-radius:2px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact
+  }
+  [data-variant=diff] .projection li[data-kind]::before{display:none}
+  [data-variant=diff] .projection li[data-kind=carried]{padding-left:26px}
+  [data-variant=diff] .projection li[data-kind=carried]::before{display:none}
+  [data-variant=diff] .gutter{
+    display:block;position:absolute;left:6px;top:2px;width:12px;
+    font:700 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--k-ink)
+  }
+  [data-variant=diff] .projection li{font-family:inherit}
+  [data-variant=diff] .meta{float:right;margin-left:10px}
+  [data-variant=diff] .ref{display:none}
+  [data-variant=diff] .tag{border:none;padding:2px 0}
+
+  .gutter,.ref,.evidence{display:none}
+  .evidence{
+    margin-top:16px;border-top:1px solid var(--rule);padding-top:9px;
+    font:11px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink-2)
+  }
+  .evidence h3{font:600 10px/1 inherit;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+  .evidence p{margin:0 0 4px}
+  .evidence b{color:var(--proj)}
+  .today .evidence{display:none}
+
+  /* ---------- floating variant bar ---------- */
+  .bar{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:9;
+    background:rgba(22,25,29,.94);color:#fff;border-radius:10px;padding:7px;
+    display:flex;gap:5px;align-items:center;
+    font:13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    box-shadow:0 6px 24px rgba(0,0,0,.28)
+  }
+  .bar b{font-weight:600;padding:0 9px 0 6px;opacity:.55;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .bar button{
+    font:inherit;color:#fff;background:transparent;border:0;padding:7px 13px;border-radius:6px;cursor:pointer
+  }
+  .bar button[aria-pressed=true]{background:#fff;color:#16191d;font-weight:600}
+
+  /* ---------- print: the Projection alone, as the shipped PDF ---------- */
+  @page{size:A4;margin:14mm 15mm 16mm}
+  @media print{
+    body{background:#fff}
+    .shell{padding:0;max-width:none}
+    .lede,.bar,.panel-label,.today{display:none!important}
+    .diptych{display:block}
+    .page{box-shadow:none;padding:0;max-width:none}
+    .stamp{margin:11px -15mm 0;padding:7px 15mm}
+    li{break-inside:avoid}
+    h2{break-after:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <p class="lede">
+    <b>Prototype for #8</b> — synthetic persona, data shaped exactly as ADR 0002's <code>roadmap.md</code> +
+    <code>projection.md</code>. Left is the Current Resume, right is the Projection. Three treatments for
+    telling projected and reframed content apart; switch below. <b>Cmd+P</b> prints the right panel alone,
+    which is the PDF we would ship.
+  </p>
+
+  <div class="diptych">
+    <!-- ============ TODAY ============ -->
+    <section>
+      <p class="panel-label">Current resume — today</p>
+      <article class="page today">
+        <div class="hdr">
+          <div>
+            <h1 class="name">Alex Moreau</h1>
+            <p class="headline">Senior Backend Engineer</p>
+          </div>
+          <p class="contact">alex@example.com<br>github.com/amoreau · Berlin</p>
+        </div>
+
+        <h2>Experience</h2>
+        <div class="role"><b>Northwind Logistics — Senior Backend Engineer</b><span>2022 – present</span></div>
+        <ul>
+          <li data-kind="carried">Own the order-routing service handling 40M requests a day across three regions.</li>
+          <li data-kind="reframed">Moved our batch jobs onto Kubernetes.
+            <span class="was"><b>Was:</b> Moved our batch jobs onto Kubernetes.</span></li>
+          <li data-kind="carried">Mentor three engineers; run the team's on-call review.</li>
+        </ul>
+
+        <div class="role"><b>Kestrel Systems — Backend Engineer</b><span>2019 – 2022</span></div>
+        <ul>
+          <li data-kind="carried">Built the billing reconciliation pipeline in Python and Postgres.</li>
+        </ul>
+
+        <h2>Projects</h2>
+        <ul><li data-kind="carried" style="color:var(--ink-3)">None yet.</li></ul>
+
+        <h2>Skills</h2>
+        <p class="skills">Python · Go · Postgres · Kubernetes · Airflow · AWS</p>
+      </article>
+    </section>
+
+    <!-- ============ PROJECTION ============ -->
+    <section>
+      <p class="panel-label">Projection — 28 Feb 2027</p>
+      <article class="page projection">
+        <div class="hdr">
+          <div>
+            <h1 class="name">Alex Moreau</h1>
+            <p class="headline">Machine Learning Engineer — Distributed Training</p>
+          </div>
+          <p class="contact">alex@example.com<br>github.com/amoreau · Berlin</p>
+        </div>
+        <div class="stamp">
+          <span>Projection — target state 28 Feb 2027</span>
+          <em>Not a record of experience</em>
+        </div>
+
+        <h2>Experience</h2>
+        <div class="role"><b>Northwind Logistics — Senior Backend Engineer</b><span>2022 – present</span></div>
+        <ul>
+          <li data-kind="carried"><span class="gutter">&nbsp;</span>Own the order-routing service handling 40M requests a day across three regions.</li>
+          <li data-kind="reframed"><span class="gutter">~</span><span class="meta"><span class="tag">Reframed</span></span>
+            Led the migration of 40+ batch training and ETL pipelines to Kubernetes, cutting job setup from days to hours.<span class="ref">R2</span>
+            <span class="was"><b>Was:</b> Moved our batch jobs onto Kubernetes.</span></li>
+          <li data-kind="carried"><span class="gutter">&nbsp;</span>Mentor three engineers; run the team's on-call review.</li>
+        </ul>
+
+        <div class="role"><b>Kestrel Systems — Backend Engineer</b><span>2019 – 2022</span></div>
+        <ul>
+          <li data-kind="carried"><span class="gutter">&nbsp;</span>Built the billing reconciliation pipeline in Python and Postgres.</li>
+        </ul>
+
+        <h2>Projects</h2>
+        <ul>
+          <li data-kind="projected"><span class="gutter">+</span><span class="meta"><span class="tag">Projected · Oct 2026</span></span>
+            Built and benchmarked a multi-GPU training harness on PyTorch FSDP, cutting step time 2.1× over the naive baseline.<span class="ref">M1</span></li>
+          <li data-kind="projected"><span class="gutter">+</span><span class="meta"><span class="tag">Projected · Dec 2026</span></span>
+            Contributed gradient-checkpointing fixes to an open-source training library, merged upstream.<span class="ref">M2</span></li>
+          <li data-kind="projected"><span class="gutter">+</span><span class="meta"><span class="tag">Projected · Feb 2027</span></span>
+            Published a written teardown of distributed-training failure modes, read 12k times.<span class="ref">M3</span></li>
+        </ul>
+
+        <h2>Skills</h2>
+        <p class="skills">Python · Go · Postgres · Kubernetes · Airflow · AWS
+          <span data-kind="projected" style="color:var(--proj)"> · PyTorch FSDP · distributed training · NCCL profiling</span></p>
+
+        <div class="evidence">
+          <h3>How the projected lines get earned</h3>
+          <p><b>M1</b> · due 15 Oct 2026 — public repo <code>github.com/amoreau/fsdp-harness</code>, README with benchmark table.</p>
+          <p><b>M2</b> · due 12 Dec 2026 — merged pull request in the upstream repository.</p>
+          <p><b>M3</b> · due 14 Feb 2027 — published post with a public URL.</p>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
+
+<nav class="bar">
+  <b>Variant</b>
+  <button data-v="ledger">Ledger</button>
+  <button data-v="blueprint">Blueprint</button>
+  <button data-v="diff">Diff</button>
+</nav>
+
+<script>
+  const root = document.documentElement;
+  const set = v => {
+    root.dataset.variant = v;
+    document.querySelectorAll('.bar button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    const u = new URL(location); u.searchParams.set('variant', v);
+    history.replaceState(null, '', u);
+  };
+  document.querySelectorAll('.bar button').forEach(b =>
+    b.addEventListener('click', () => set(b.dataset.v)));
+  set(new URL(location).searchParams.get('variant') || 'ledger');
+</script>
+</body>
+</html>
