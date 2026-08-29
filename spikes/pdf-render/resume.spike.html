@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Chrome uses <title> as the PDF /Title metadata entry. See FINDINGS.md. -->
+<title>PROJECTION — Alex Rivera — target state 2027-03-01. Not a record of experience.</title>
+<meta name="description" content="PROJECTION. Target state 2027-03-01. Not a record of experience.">
+<meta name="author" content="Alex Rivera">
+<meta name="subject" content="PROJECTION. Target state 2027-03-01. Not a record of experience.">
+<!-- Google Fonts, with a real fallback stack. Deliberately remote to test the
+     offline/headless behaviour of a web font in the print pipeline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- page geometry: the first hard part ---------- */
+  @page {
+    size: Letter;              /* also tried A4 — see FINDINGS.md */
+    margin: 14mm 15mm 16mm 15mm;
+  }
+  /* A named page for the first sheet, to check @page :first support */
+  @page :first {
+    margin-top: 10mm;
+  }
+
+  :root {
+    --ink: #16181d;
+    --muted: #5c6370;
+    --rule: #d7dbe2;
+    --stamp-bg: #2f3b52;       /* the background-coloured band */
+    --stamp-ink: #ffffff;
+    --projected: #b45309;
+    --projected-bg: #fdf0dc;
+    --reframed: #1d4ed8;
+    --reframed-bg: #e8eefc;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+    font-size: 10.2pt;
+    line-height: 1.42;
+    color: var(--ink);
+    /* Force backgrounds/colours to survive the print pipeline.
+       Both the standard and the -webkit- prefixed property, on purpose. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ---------- multi-column header ---------- */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6mm;
+    align-items: end;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 3mm;
+  }
+  .name {
+    font-size: 24pt;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.05;
+  }
+  .headline {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 9.4pt;
+    color: var(--muted);
+    margin-top: 1.5mm;
+  }
+  .contact {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.6pt;
+    color: var(--muted);
+    text-align: right;
+    display: grid;
+    gap: 0.8mm;
+  }
+  .contact a { color: inherit; text-decoration: none; }
+
+  /* ---------- the Stamp band: background colour under the name ---------- */
+  .stamp-band {
+    background: var(--stamp-bg);
+    color: var(--stamp-ink);
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.4pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2.2mm 3mm;
+    margin-top: 3mm;
+    display: flex;
+    justify-content: space-between;
+    gap: 4mm;
+    /* full-bleed-ish: pull out into the @page margin to test negative margins */
+    margin-left: -3mm;
+    margin-right: -3mm;
+    break-after: avoid;
+    break-inside: avoid;
+  }
+  .stamp-band strong { font-weight: 700; }
+
+  /* Repeat the stamp on every page via a running band is NOT possible in
+     print CSS; instead we test position:fixed, which Chrome repeats per page. */
+  .stamp-runner {
+    position: fixed;
+    bottom: -11mm;
+    left: 0;
+    right: 0;
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 7pt;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-top: 0.6pt solid var(--rule);
+    padding-top: 1.4mm;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 5mm; }
+  h2 {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.8pt;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 2mm 0;
+    padding-bottom: 1mm;
+    border-bottom: 0.8pt solid var(--rule);
+    break-after: avoid;       /* heading must not be orphaned at page foot */
+  }
+
+  .role {
+    break-inside: avoid;      /* the key test: keep a whole job on one page */
+    margin-bottom: 3.5mm;
+  }
+  .role-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4mm;
+    align-items: baseline;
+  }
+  .role-title { font-weight: 600; }
+  .role-org { color: var(--muted); }
+  .role-dates {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.4pt;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  ul { margin: 1.5mm 0 0 0; padding-left: 4.5mm; }
+  li { margin: 0 0 1.2mm 0; break-inside: avoid; }
+
+  /* ---------- per-bullet stamp marks ---------- */
+  li[data-mark]::after {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 6.6pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.4mm 1.2mm;
+    margin-left: 1.6mm;
+    border-radius: 1mm;
+    white-space: nowrap;
+    vertical-align: 0.6mm;
+  }
+  li[data-mark="projected"]::after {
+    content: "Projected";
+    color: var(--projected);
+    background: var(--projected-bg);
+    box-shadow: inset 0 0 0 0.5pt var(--projected);
+  }
+  li[data-mark="reframed"]::after {
+    content: "Reframed";
+    color: var(--reframed);
+    background: var(--reframed-bg);
+    box-shadow: inset 0 0 0 0.5pt var(--reframed);
+  }
+
+  /* ---------- forced page boundary ---------- */
+  .page-break { break-before: page; }
+
+  /* ---------- two-column skills grid ---------- */
+  .skills {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 1.4mm 4mm;
+    font-size: 9.6pt;
+  }
+  .skills dt {
+    font-family: "Inter", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 8.2pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding-top: 0.5mm;
+  }
+  .skills dd { margin: 0; }
+
+  /* CSS multi-column, the other thing that famously fights pagination */
+  .cols2 { column-count: 2; column-gap: 7mm; }
+  .cols2 .role { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="stamp-runner" aria-hidden="true">
+  <span>Projection — target state 2027-03-01</span>
+  <span>Not a record of experience</span>
+</div>
+
+<header>
+  <div class="masthead">
+    <div>
+      <h1 class="name">Alex Rivera</h1>
+      <div class="headline">Backend &amp; Distributed Systems Engineer — projecting toward Staff Platform Engineer</div>
+    </div>
+    <div class="contact">
+      <span>alex.rivera@example.com</span>
+      <span>+1 (555) 014-2288</span>
+      <span><a href="https://github.com/example">github.com/example</a></span>
+      <span>Bristol, UK</span>
+    </div>
+  </div>
+
+  <div class="stamp-band">
+    <span><strong>Projection</strong> — target state 1 March 2027</span>
+    <span>Not a record of experience</span>
+  </div>
+</header>
+
+<section>
+  <h2>Summary</h2>
+  <p style="margin:0">Backend engineer with six years on high-throughput payment infrastructure, moving deliberately toward
+  platform and reliability ownership. The lines below marked <em>Projected</em> are not yet true; each one is earned by a
+  dated Milestone in the accompanying roadmap, and each Milestone names third-party-checkable Evidence.</p>
+</section>
+
+<section>
+  <h2>Experience</h2>
+
+  <div class="role">
+    <div class="role-head">
+      <div><span class="role-title">Senior Software Engineer</span>, <span class="role-org">Meridian Payments</span></div>
+      <div class="role-dates">Mar 2022 — Mar 2027</div>
+    </div>
+    <ul>
+      <li>Owned the settlement ledger service handling 4.2M transactions per day at p99 &lt; 90 ms.</li>
+      <li data-mark="reframed">Led the migration of the ledger from a single Postgres primary to a sharded topology, cutting peak write contention by 61% — framed for platform ownership rather than feature delivery.</li>
+      <li>Built the idempotency layer that eliminated duplicate-capture incidents entirely across two peak seasons.</li>
+      <li data-mark="projected">Published <em>meridian-shardkit</em>, an open-source Postgres resharding toolkit, and drove it to first external production adopter.</li>
+      <li data-mark="projected">Ran the service's first formal error-budget policy, with SLOs published and reviewed monthly by the platform group.</li>
+      <li>Mentored three engineers through their first on-call rotations; wrote the runbook set still in use.</li>
+    </ul>
+  </div>
+
+  <div class="role">
+    <div class="role-head">
+      <div><span class="role-title">Software Engineer</span>, <span class="role-org">Northgate Logistics</span></div>
+      <div class="role-dates">Jul 2019 — Feb 2022</div>
+    </div>
+    <ul>
+      <li>Rewrote the route-optimisation batch pipeline in Go, taking a nightly 6-hour job to 38 minutes.</li>
+      <li data-mark="reframed">Designed the event schema that eleven downstream teams consumed — restated as interface stewardship, the scope Staff roles are judged on.</li>
+      <li>Introduced contract tests between the dispatch and billing services, ending a recurring class of release rollbacks.</li>
+      <li>Ran the incident review process for the logistics group for eighteen months.</li>
+    </ul>
+  </div>
+
+  <div class="role">
+    <div class="role-head">
+      <div><span class="role-title">Junior Engineer</span>, <span class="role-org">Fenwick Analytics</span></div>
+      <div class="role-dates">Sep 2018 — Jun 2019</div>
+    </div>
+    <ul>
+      <li>Maintained the ingestion connectors for eight third-party data vendors.</li>
+      <li>Cut the nightly ETL failure rate from roughly one in four runs to under one in fifty.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Open source &amp; writing</h2>
+  <div class="role">
+    <ul>
+      <li data-mark="projected">Merged three contributions to the Vitess resharding path, including a fix to the vreplication catch-up loop.</li>
+      <li data-mark="projected">Wrote a five-part series on online resharding without downtime; the first part reached the front page of Lobsters.</li>
+      <li data-mark="projected">Gave a 25-minute talk on error-budget policy at a regional SRE meetup, recording published.</li>
+      <li>Long-standing maintainer of <em>pgbench-scenarios</em>, a small load-shape library with 340 stars.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== forced page boundary; content below must land on page 2 ===== -->
+<section class="page-break">
+  <h2>Skills</h2>
+  <dl class="skills">
+    <dt>Languages</dt><dd>Go, Python, SQL, TypeScript, a working amount of Rust</dd>
+    <dt>Data</dt><dd>PostgreSQL (incl. logical replication, partitioning), Vitess, Redis, Kafka, ClickHouse</dd>
+    <dt>Platform</dt><dd>Kubernetes, Terraform, ArgoCD, GitHub Actions, Nix for dev shells</dd>
+    <dt>Observability</dt><dd>Prometheus, Grafana, OpenTelemetry, error-budget and SLO practice</dd>
+    <dt>Practice</dt><dd>Incident review, capacity planning, design review facilitation, on-call rotation design</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Certifications</h2>
+  <div class="role">
+    <ul>
+      <li data-mark="projected">Certified Kubernetes Administrator (CKA), certification id published on the Linux Foundation directory.</li>
+      <li data-mark="projected">AWS Certified Solutions Architect — Professional.</li>
+      <li>PostgreSQL 14 Associate (EDB), 2023.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Selected projects</h2>
+  <div class="cols2">
+    <div class="role">
+      <div class="role-head"><div><span class="role-title">meridian-shardkit</span></div><div class="role-dates">2026—27</div></div>
+      <ul>
+        <li data-mark="projected">Online resharding toolkit for Postgres: cutover orchestration, dual-write verification, and a rollback path that has been exercised in anger.</li>
+        <li data-mark="projected">Documented against a public benchmark suite so adopters can reproduce the numbers.</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="role-head"><div><span class="role-title">pgbench-scenarios</span></div><div class="role-dates">2021—</div></div>
+      <ul>
+        <li>A library of realistic load shapes for Postgres benchmarking; used in two published papers.</li>
+        <li>Maintained with a monthly release cadence and a documented compatibility policy.</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="role-head"><div><span class="role-title">ledger-fuzz</span></div><div class="role-dates">2024—</div></div>
+      <ul>
+        <li>Property-based fuzzer for double-entry ledger invariants; found four latent bugs in internal services.</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="role-head"><div><span class="role-title">runbook-lint</span></div><div class="role-dates">2023—</div></div>
+      <ul>
+        <li>Static checks for operational runbooks: every step must name a verification and a rollback.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Long block — deliberately spans a page boundary</h2>
+  <div class="role">
+    <div class="role-head">
+      <div><span class="role-title">Break-control probe</span>, <span class="role-org">every item below carries break-inside: avoid</span></div>
+      <div class="role-dates">page 2 → 3</div>
+    </div>
+    <ul>
+      <li>Probe line 01 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 02 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 03 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 04 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 05 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 06 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 07 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 08 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 09 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 10 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 11 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 12 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 13 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 14 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+      <li>Probe line 15 — a paragraph long enough to be split by a naive layout engine, so that the presence or absence of a mid-item break is observable in the rendered PDF without measuring anything by hand. If break-inside is honoured, this item appears whole on one page.</li>
+    </ul>
+  </div>
+
+  <div class="role" style="background:#f2f4f8; padding:3mm; border-left:2mm solid var(--stamp-bg)">
+    <strong>Second background-colour probe.</strong> This block sits deep in the document, so it also tests whether
+    background colour survives on pages after the first. If this box is white in the PDF, background printing is off.
+  </div>
+</section>
+
+<section>
+  <h2>Stamp repeat probe</h2>
+  <div class="stamp-band">
+    <span><strong>Projection</strong> — target state 1 March 2027</span>
+    <span>Not a record of experience</span>
+  </div>
+  <p style="margin-top:2mm">A second Stamp band, far from the top of the document, so that background colour on a later
+  page is unambiguous.</p>
+</section>
+
+</body>
+</html>

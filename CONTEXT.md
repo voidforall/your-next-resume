@@ -39,3 +39,13 @@ Projectable: skills; artifacts the user can ship themselves (side projects, open
 Never projectable: a new job title, a new employer, a promotion, headcount or reports, compensation, degrees, or any achievement attributable to a company the user does not work at.
 
 The test is: **could the user make this true by themselves, inside the Projection Window?**
+
+## Source files
+
+**`roadmap.md`** — the agent-owned source of truth for Milestones. Each Milestone owns the Projected Bullets it earns, so an unearned Projected Bullet has nowhere to exist. Absolute `Start:`/`Due:` dates; a `- [ ] done` checkbox plus `Completed:` date is the durable progress record.
+
+**`projection.md`** — Carried and Reframed Bullets in resume order, plus the empty sections that Projected Bullets land in. Every Reframed Bullet carries a `Was:` line holding the original wording, so the diptych can show the reframe honestly.
+
+**Bullet id** — stable, unique, prefixed by kind: `C1` carried, `R1` reframed, `P1` projected. Renderers link bullets to Milestones by id, never by text.
+
+Schema and validation rules: [docs/adr/0002-roadmap-schema.md](docs/adr/0002-roadmap-schema.md).
