@@ -96,13 +96,6 @@ Not an ATS optimiser — those scores are noise. Not a job board. Not a guarante
 
 Node 18+ and Chrome, Chromium or Edge for the PDFs. No API keys, no account, no network — everything runs locally, and nothing is uploaded. Without a browser you still get every document, and instructions to print them yourself.
 
-## How it's built
-
-`skills/your-next-resume/` is the skill. [`CONTEXT.md`](CONTEXT.md) is the vocabulary,
-[`docs/adr/`](docs/adr/) is every decision and why it was made — 15 so far, from the projection
-contract itself to the Tech Tree view and the nested Task checklist — and [`evals/`](evals/) holds
-the cases it was tested against, including a no-skill baseline.
-
 Zero runtime dependencies. The roadmap page is one self-contained HTML file — no build step, no
 CDN, opens from `file://` forever.
 
