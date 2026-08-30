@@ -98,7 +98,7 @@ than assuming a path:
 S=<the directory containing this SKILL.md>
 OUT=your-next-resume
 
-node "$S/scripts/render-roadmap.mjs"    "$OUT/roadmap.md" "$OUT/roadmap.html" --projection "$OUT/projection.md"
+node "$S/scripts/render-roadmap.mjs"    "$OUT/roadmap.md" "$OUT/roadmap.html"
 node "$S/scripts/render-projection.mjs" "$OUT/projection.html"                --source "$OUT"
 node "$S/scripts/render-projection.mjs" "$OUT/resume-today.html" --mode today --source "$OUT"
 node "$S/scripts/render-pdf.mjs"        "$OUT/projection.html"   "$OUT/projection.pdf"

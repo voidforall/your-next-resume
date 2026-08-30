@@ -198,9 +198,8 @@ input[type=checkbox]:indeterminate { accent-color: var(--ink-3) }
 .steps-progress .sp-label { font-size: 11px; color: var(--ink-3); white-space: nowrap }
 
 /* ---------- view: timeline (default) ---------- */
-[data-view=timeline] .view-bullets, [data-view=timeline] .view-tree { display: none }
-[data-view=bullets] .view-timeline, [data-view=bullets] .view-tree { display: none }
-[data-view=tree] .view-timeline, [data-view=tree] .view-bullets { display: none }
+[data-view=timeline] .view-tree { display: none }
+[data-view=tree] .view-timeline { display: none }
 
 .timeline { position: relative; padding-left: 104px }
 .timeline::before {
@@ -224,32 +223,7 @@ input[type=checkbox]:indeterminate { accent-color: var(--ink-3) }
 }
 .tl-month:first-child { margin-top: 0 }
 
-/* ---------- view: by resume line ---------- */
-.grp { margin: 0 0 22px }
-.grp > h2 {
-  font-weight: 600; font-size: 11px; line-height: 1; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
-  margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); break-after: avoid;
-}
-.blt {
-  background: #fff; border: 1px solid var(--rule); border-left: 3px solid var(--proj-rule);
-  border-radius: 4px; padding: 12px 14px; margin: 0 0 12px; break-inside: avoid;
-}
-.blt.is-refr { border-left-color: var(--refr-rule) }
-.blt-txt { font-size: 14px; margin: 0 0 3px }
-.blt-txt .bid { margin-right: 7px }
-.blt.is-refr .bid { color: var(--refr) }
-.blt-meta { font-size: 12px; color: var(--ink-3); margin: 0 0 9px }
-.blt ol { margin: 0; padding: 0; list-style: none }
-.blt ol li {
-  display: flex; gap: 9px; align-items: flex-start; padding: 7px 0 0;
-  border-top: 1px dashed var(--rule); margin-top: 7px; font-size: 13px;
-}
-.blt ol li:first-child { border-top: 0; margin-top: 0 }
-.blt ol .ms-body { flex: 1 1 auto }
-.blt ol b { font-weight: 600 }
-.blt ol .due { margin-left: auto }
-
-/* ---------- view: tech tree (ADR 0014) ---------- */
+/* ---------- view: tech tree, labelled "Map" in the UI (ADR 0014) ---------- */
 .view-tree { display: flex; gap: 20px; align-items: flex-start }
 .tt-graph { flex: 1 1 auto; overflow-x: auto; padding: 10px 4px 30px }
 .tt-grid { position: relative }

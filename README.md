@@ -59,13 +59,12 @@ checkbox updates (checked, or a dash if partway through), and the roadmap-wide t
 the page moves too — three levels, one tick, always in gray or `--accent`, never the green that
 means a milestone is actually, Evidence-backed done.
 
-The page ships three views, switchable at the bottom: a dated **Timeline**, the same plan **by
-resume line** (which bullet does this milestone buy, and why), and a game-style **Tech Tree** —
-milestones laid out by dependency, lit up or dimmed as you click through what a milestone needs and
-what it unlocks, dashed and grayed out until every prerequisite is actually done.
+The page ships two views, switchable at the bottom: a dated **Timeline**, and a game-style **Map**
+— milestones laid out by dependency, lit up or dimmed as you click through what a milestone needs
+and what it unlocks, dashed and grayed out until every prerequisite is actually done.
 
 <p align="center">
-  <img src="docs/media/tech-tree.png" alt="The Tech Tree view: milestones as connected nodes, one selected and highlighted along its full dependency chain while unrelated nodes dim, with a detail panel on the right showing that milestone's Deliverable, Evidence and Earns block." width="100%">
+  <img src="docs/media/tech-tree.png" alt="The Map view: milestones as connected nodes, one selected and highlighted along its full dependency chain while unrelated nodes dim, with a detail panel on the right showing that milestone's Deliverable, Evidence and Earns block." width="100%">
 </p>
 
 ## Requirements

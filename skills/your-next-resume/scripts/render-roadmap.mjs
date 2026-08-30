@@ -5,19 +5,19 @@
  *   node render-roadmap.mjs <roadmap.md> <out.html>
  *   node render-roadmap.mjs <out.html>            # defaults to the Alex Moreau fixture
  *
- * All three views are rendered server-side, so the page is complete before a line of
+ * Both views are rendered server-side, so the page is complete before a line of
  * script runs; roadmap.client.js only adds the toggle, the localStorage ticks, the meter
- * and the tech tree's click-to-select highlighting. Output is one self-contained file:
+ * and the Map's click-to-select highlighting. Output is one self-contained file:
  * no network, no fonts, no libraries.
  *
  * Zero dependencies. Parsing goes through scripts/parse.mjs, the single source of
  * schema truth (ADR 0002) — this file never reads markdown structure itself.
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseRoadmap, parseProjection, gapClasses } from "./parse.mjs";
+import { parseRoadmap, gapClasses } from "./parse.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../..");
@@ -199,7 +199,7 @@ const rows = (milestone) => {
 /**
  * ADR 0015: a Step's Tasks count individually when present; a zero-task Step counts as
  * one item itself — preserves ADR 0013's flat semantics exactly when nothing is nested.
- * Shared by the milestone card's supplementary progress bar, the Tech Tree node's fill
+ * Shared by the milestone card's supplementary progress bar, the Map node's fill
  * strip, and the header's roadmap-wide meter, so all three levels always agree.
  */
 const actionItems = (milestone) => milestone.steps.flatMap((s) => (s.tasks.length > 0 ? s.tasks : [s]));
@@ -298,75 +298,7 @@ const timelineView = (milestones) => {
   return `<section class="view-timeline"><div class="timeline">${html}</div></section>`;
 };
 
-/* ------------------------------------------------------- view: by resume line */
-
-/** Invert the same structure: the bullet becomes the subject, milestones the proof. */
-const indexBullets = (milestones) => {
-  const ordered = [...milestones].sort(byDue);
-  const bullets = new Map();
-  for (const m of ordered) {
-    for (const e of m.earns) {
-      const found = bullets.get(e.id);
-      if (found) bullets.set(e.id, { ...found, milestones: [...found.milestones, m] });
-      else bullets.set(e.id, { ...e, milestones: [m] });
-    }
-  }
-  return [...bullets.values()];
-};
-
-const KIND_BLURB = {
-  projected: "Projected — not true yet",
-  reframed: "Reframed — true today, said in the target's language",
-  carried: "Carried — true today, reproduced unchanged",
-};
-
-const bulletCard = (bullet) => {
-  const refr = bullet.kind !== "projected";
-  const proof = bullet.milestones
-    .map((m) => `<li data-m="${esc(m.id)}">
-    <input type="checkbox"${m.done ? " checked" : ""} aria-label="Mark ${esc(m.id)} done">
-    <span class="ms-body"><b>${esc(m.id)}</b> ${inline(m.title)} ${whereChip(m.fields.Where)}<br><span class="sect">${inline(m.fields.Evidence)}</span></span>
-    <span class="due">${esc(fmtDate(m.fields.Due))}</span>
-  </li>`)
-    .join("");
-  return `<div class="blt${refr ? " is-refr" : ""}">
-  <p class="blt-txt"><span class="bid">${esc(bullet.id)}</span>${inline(bullet.text)}</p>
-  <p class="blt-meta">${esc(KIND_BLURB[bullet.kind] ?? bullet.kind)} · earned by ${bullet.milestones.map((m) => esc(m.id)).join(", ")}</p>
-  <ol>${proof}</ol>
-</div>`;
-};
-
-/**
- * Section order follows the resume itself when projection.md is available — the roadmap
- * should read in the order of the document it earns. `Header` leads, since that is where
- * it sits on the resume. Sections the projection does not define keep due-date order, at
- * the end. Without projection.md, everything falls back to due-date order.
- */
-const orderSections = (found, resumeOrder) => {
-  if (resumeOrder.length === 0) return found;
-  const rank = (name) => {
-    if (name === "Header") return -1;
-    const i = resumeOrder.findIndex((s) => s === name || s.startsWith(name));
-    return i === -1 ? Number.MAX_SAFE_INTEGER : i;
-  };
-  return [...found].sort((a, b) => rank(a) - rank(b) || found.indexOf(a) - found.indexOf(b));
-};
-
-const bulletsView = (milestones, resumeOrder = []) => {
-  const bullets = indexBullets(milestones);
-  const sections = orderSections([...new Set(bullets.map((b) => b.section))], resumeOrder);
-  const groups = sections
-    .map((name) => {
-      const inSection = bullets
-        .filter((b) => b.section === name)
-        .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
-      return `<section class="grp"><h2>${esc(name)}</h2>${inSection.map(bulletCard).join("")}</section>`;
-    })
-    .join("");
-  return `<section class="view-bullets">${groups}</section>`;
-};
-
-/* ------------------------------------------------------------ view: tech tree */
+/* ------------------------------------------------------------ view: tech tree (labelled "Map" in the UI) */
 
 /* ADR 0014: fixed node size in a deterministic, server-computed layout — see computeTiers. */
 const NODE_W = 200;
@@ -586,7 +518,7 @@ const reachabilityBlock = (groups) => {
 /** Inlined assets must not be able to close their own tag. */
 const inlineSafe = (text) => text.replace(/<\/(script|style)/gi, "<\\/$1");
 
-const page = ({ milestones, meta, resumeOrder = [], reachability = [], note = "" }) => {
+const page = ({ milestones, meta, reachability = [], note = "" }) => {
   const css = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.css"), "utf8"));
   const js = inlineSafe(readFileSync(resolve(ASSETS, "roadmap.client.js"), "utf8"));
   const title = `Roadmap — ${meta.target || "projection"}${meta.window_end ? `, by ${fmtDate(meta.window_end)}` : ""}`;
@@ -608,15 +540,13 @@ ${header(milestones, meta)}
 ${noteBlock(note)}
 ${reachabilityBlock(reachability)}
 ${timelineView(milestones)}
-${bulletsView(milestones, resumeOrder)}
 ${treeView(milestones)}
 </div>
 
 <nav class="switch">
   <b>View</b>
   <button type="button" data-v="timeline" aria-pressed="true">Timeline</button>
-  <button type="button" data-v="bullets" aria-pressed="false">By resume line</button>
-  <button type="button" data-v="tree" aria-pressed="false">Tech Tree</button>
+  <button type="button" data-v="tree" aria-pressed="false">Map</button>
 </nav>
 
 <script>
@@ -629,36 +559,16 @@ ${js}
 
 /* ---------------------------------------------------------------------- main */
 
-const usage =
-  "usage: node render-roadmap.mjs [roadmap.md] <out.html> [--projection <projection.md>]";
+const usage = "usage: node render-roadmap.mjs [roadmap.md] <out.html>";
 
 const readArgs = (argv) => {
-  const rest = [];
-  let projection = null;
-  for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i] === "--projection") {
-      projection = argv[i + 1] ? resolve(argv[i + 1]) : null;
-      if (!projection) throw new Error(`--projection needs a path\n${usage}`);
-      i += 1;
-    } else rest.push(argv[i]);
-  }
-  if (rest.length === 1) return { input: DEFAULT_INPUT, output: resolve(rest[0]), projection };
-  if (rest.length === 2) return { input: resolve(rest[0]), output: resolve(rest[1]), projection };
+  if (argv.length === 1) return { input: DEFAULT_INPUT, output: resolve(argv[0]) };
+  if (argv.length === 2) return { input: resolve(argv[0]), output: resolve(argv[1]) };
   throw new Error(usage);
 };
 
-/** Section order from projection.md — named explicitly, or found beside the roadmap. */
-const readResumeOrder = (input, explicit) => {
-  const path = explicit ?? resolve(dirname(input), "projection.md");
-  if (!existsSync(path)) {
-    if (explicit) throw new Error(`cannot read projection "${path}"`);
-    return [];
-  }
-  return parseProjection(readFileSync(path, "utf8")).sections.map((s) => s.name);
-};
-
 const main = (argv) => {
-  const { input, output, projection } = readArgs(argv);
+  const { input, output } = readArgs(argv);
   if (!/\.html?$/i.test(output)) throw new Error(`output must be an .html file\n${usage}`);
 
   let text;
@@ -672,9 +582,8 @@ const main = (argv) => {
   validate(milestones, input);
 
   mkdirSync(dirname(output), { recursive: true });
-  const resumeOrder = readResumeOrder(input, projection);
-  writeFileSync(output, page({ milestones, meta, resumeOrder, reachability, note }), "utf8");
-  process.stdout.write(`✓ ${output} — ${milestones.length} milestones, timeline + by-resume-line + tech tree\n`);
+  writeFileSync(output, page({ milestones, meta, reachability, note }), "utf8");
+  process.stdout.write(`✓ ${output} — ${milestones.length} milestones, timeline + map\n`);
 };
 
 try {
