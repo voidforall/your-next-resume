@@ -6,6 +6,17 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/voidforall/your-next-resume/actions/workflows/ci.yml"><img src="https://github.com/voidforall/your-next-resume/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white" alt="Node >= 18">
+  <img src="https://img.shields.io/badge/dependencies-zero-lightgrey" alt="Zero dependencies">
+</p>
+
+**No line appears on the projection unless a milestone earns it.** Every green line traces to a
+dated milestone that names the evidence which would prove it — a repo, a merged PR, a design doc
+your team reviewed. If nothing earns a line, it's deleted, not softened.
+
+<p align="center">
   <img src="docs/media/diptych.png" alt="Left: today's resume. Right: the projection, with reframed lines in amber and projected lines in green, under a stamp reading PROJECTED STATE · 28 FEB 2027 — EARNED ONLY IF THE ROADMAP IS COMPLETED." width="100%">
 </p>
 
@@ -36,10 +47,26 @@ Seven files in `./your-next-resume/`:
 | `roadmap.md` · `projection.md` | the source. Yours to edit; re-render any time |
 
 <p align="center">
-  <img src="docs/media/roadmap.png" alt="The roadmap page: a dated timeline of milestones, each showing its deliverable, the evidence that would prove it, and the resume line it earns." width="100%">
+  <img src="docs/media/roadmap.png" alt="A milestone card: Deliverable, Evidence and Learning fields, a Steps checklist with a nested, collapsed Tasks sub-list under each step, and a supplementary progress bar reading 2 of 9 action items done, distinct from the green Earns block below it." width="100%">
 </p>
 
 Each milestone says what to build, by when, what evidence proves it, and which resume line it buys. It is labelled **At work** or **Own time**, and the page shows the split — because a plan that quietly assumes your evenings is a plan for people who have evenings.
+
+A milestone breaks down into **Steps**, and a Step can break down further into granular,
+roughly-hour-sized **Tasks** — collapsed by default so the page stays scannable, open the moment
+you're ready to work through one. Tick a task and the progress bar above it moves, its Step's
+checkbox updates (checked, or a dash if partway through), and the roadmap-wide tally at the top of
+the page moves too — three levels, one tick, always in gray or `--accent`, never the green that
+means a milestone is actually, Evidence-backed done.
+
+The page ships three views, switchable at the bottom: a dated **Timeline**, the same plan **by
+resume line** (which bullet does this milestone buy, and why), and a game-style **Tech Tree** —
+milestones laid out by dependency, lit up or dimmed as you click through what a milestone needs and
+what it unlocks, dashed and grayed out until every prerequisite is actually done.
+
+<p align="center">
+  <img src="docs/media/tech-tree.png" alt="The Tech Tree view: milestones as connected nodes, one selected and highlighted along its full dependency chain while unrelated nodes dim, with a detail panel on the right showing that milestone's Deliverable, Evidence and Earns block." width="100%">
+</p>
 
 ## When the target is out of reach
 
@@ -71,6 +98,12 @@ Node 18+ and Chrome, Chromium or Edge for the PDFs. No API keys, no account, no 
 
 ## How it's built
 
-`skills/your-next-resume/` is the skill. [`CONTEXT.md`](CONTEXT.md) is the vocabulary, [`docs/adr/`](docs/adr/) is every decision and why it was made, and [`evals/`](evals/) holds the cases it was tested against — including a no-skill baseline.
+`skills/your-next-resume/` is the skill. [`CONTEXT.md`](CONTEXT.md) is the vocabulary,
+[`docs/adr/`](docs/adr/) is every decision and why it was made — 15 so far, from the projection
+contract itself to the Tech Tree view and the nested Task checklist — and [`evals/`](evals/) holds
+the cases it was tested against, including a no-skill baseline.
+
+Zero runtime dependencies. The roadmap page is one self-contained HTML file — no build step, no
+CDN, opens from `file://` forever.
 
 MIT.
