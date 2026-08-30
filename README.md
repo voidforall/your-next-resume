@@ -68,30 +68,6 @@ what it unlocks, dashed and grayed out until every prerequisite is actually done
   <img src="docs/media/tech-tree.png" alt="The Tech Tree view: milestones as connected nodes, one selected and highlighted along its full dependency chain while unrelated nodes dim, with a detail panel on the right showing that milestone's Deliverable, Evidence and Earns block." width="100%">
 </p>
 
-## When the target is out of reach
-
-It will tell you, and plan the first leg instead of promising the whole trip.
-
-<p align="center">
-  <img src="docs/media/out-of-reach.png" alt="A roadmap for a bootcamp graduate: the masthead names this window's reachable role and the eventual target beyond it, above three cards classifying every requirement as closeable, needs longer, or needs a different job first." width="100%">
-</p>
-
-Every requirement in the posting is sorted into *closeable in this window*, *needs longer*, or *needs a different job first* — that last one being the honest reason some jobs are two moves away, not one. No score out of 100; scanners disagree with each other by twenty points on the same file, and a number would only look precise.
-
-## What it won't do
-
-Ask it to take the banner off and it declines:
-
-> I can't take the banner or the `+` marks off — they are the same stamp in three layers, and without them the document reads as a record of work you haven't done yet.
->
-> The resume you can send tomorrow already exists: `your-next-resume/resume-today.pdf` — no banner, no marks, no projected bullets, and every line on it is true today.
-
-It won't backdate a milestone, write experience at an employer you haven't worked for, or word projected bullets as things you've already done.
-
-## What it isn't
-
-Not an ATS optimiser — those scores are noise. Not a job board. Not a guarantee: a roadmap is a plan, and plans are wrong. It won't make you a Staff engineer in six months if you aren't close, and it will say so rather than print it.
-
 ## Requirements
 
 Node 18+ and Chrome, Chromium or Edge for the PDFs. No API keys, no account, no network — everything runs locally, and nothing is uploaded. Without a browser you still get every document, and instructions to print them yourself.
