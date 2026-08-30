@@ -1,4 +1,6 @@
-# Internal decision log — not part of what installs via `npx skills add`
-# (the CLI only ever touches skills/your-next-resume/), kept out of the
-# public repo/release going forward.
+# Internal decision log, research notes, and throwaway prototypes — not part
+# of what installs via `npx skills add` (the CLI only ever touches
+# skills/your-next-resume/), kept out of the public repo/release going forward.
 docs/adr/
+docs/research/
+spikes/
