@@ -21,6 +21,20 @@ own_time_capacity: evenings and weekends
 - **Learning:** PyTorch FSDP tutorial · ZeRO paper
 - **Completed:** —
 
+**Steps**
+
+- [ ] Work through the [PyTorch FSDP tutorial](https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html) end to end
+  - [ ] Read the tutorial's "How FSDP Works" section and sketch the sharding diagram from memory
+  - [ ] Run the tutorial's example script on a single GPU and confirm the baseline output
+  - [ ] Modify the tutorial script to wrap a larger model and rerun it end to end
+- [ ] Get a 4-GPU box provisioned and confirm NCCL all-reduce works
+- [ ] Wrap the model in FSDP and get a training loop running without OOM
+  - [x] Apply `FSDP()` around the model definition and run one training step
+  - [ ] Capture and read the first OOM stack trace
+  - [ ] Enable activation checkpointing and confirm memory drops
+  - [ ] Run a full epoch end to end without OOM
+- [x] Write the benchmark harness and the README teardown
+
 **Earns**
 
 - `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on PyTorch FSDP against a single-GPU baseline.

@@ -64,6 +64,10 @@ h1 { font-weight: 600; font-size: 26px; line-height: 1.2; letter-spacing: -.012e
 .bar { flex: 1; height: 7px; background: #e3e6ea; border-radius: 99px; overflow: hidden }
 .bar i { display: block; height: 100%; background: var(--proj-rule); width: 0 }
 .meter b { font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap }
+/* ADR 0015: the roadmap-wide action-item meter — --accent, deliberately not --proj-rule,
+   so it never reads as the same signal as the milestone-done meter directly above it. */
+.tasks-meter { margin-top: 8px }
+.tasks-meter .bar i { background: var(--accent) }
 
 .note {
   margin: 13px 0 0; padding: 8px 11px; background: #fff;
@@ -144,9 +148,59 @@ dd a { color: var(--accent) }
 .earns.is-refr .bid { color: var(--refr) }
 .sect { font-size: 11.5px; color: var(--ink-3) }
 
+/* ---------- ADR 0013: optional per-milestone Steps checklist ---------- */
+.steps { margin: 11px 0 0 }
+.steps summary {
+  cursor: pointer; list-style: none; outline: none;
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 10.5px; line-height: 1; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.steps summary::-webkit-details-marker { display: none }
+.steps summary::before { content: "▸"; font-size: 10px; color: var(--ink-3) }
+.steps[open] summary::before { content: "▾" }
+.steps ul { margin: 7px 0 0; padding: 0; list-style: none }
+.steps li {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 4px 0 4px 1px; font-size: 13px; color: var(--ink-2);
+}
+.steps li input[type=checkbox] { margin-top: 2px }
+.steps li.done span { color: var(--done); text-decoration: line-through; text-decoration-color: var(--done) }
+.steps li .step-main { flex: 1 1 auto; min-width: 0 }
+.steps li input[type=checkbox][disabled] { cursor: default; opacity: .55 }
+input[type=checkbox]:indeterminate { accent-color: var(--ink-3) }
+
+/* ---------- ADR 0015: nested Tasks under a Step — collapsed by default ---------- */
+.tasks { margin: 5px 0 0 }
+.tasks summary {
+  cursor: pointer; list-style: none; outline: none;
+  display: flex; align-items: center; gap: 5px;
+  font-weight: 600; font-size: 10px; line-height: 1; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.tasks summary::-webkit-details-marker { display: none }
+.tasks summary::before { content: "▸"; font-size: 9px; color: var(--ink-3) }
+.tasks[open] summary::before { content: "▾" }
+.tasks ul { margin: 5px 0 0; padding: 0 0 0 12px; list-style: none; border-left: 2px solid var(--rule) }
+.tasks li {
+  display: flex; gap: 7px; align-items: flex-start;
+  padding: 3px 0 3px 8px; font-size: 12px; color: var(--ink-2);
+}
+.tasks li input[type=checkbox] { width: 14px; height: 14px; margin-top: 2px }
+.tasks li.done span { color: var(--done); text-decoration: line-through; text-decoration-color: var(--done) }
+
+/* Supplementary progress only — deliberately grayscale/accent, never --proj/--proj-rule
+   (that palette means the milestone's real, Evidence-backed done state elsewhere on the
+   page). Ticking tasks must never visually resemble a milestone actually being done. */
+.steps-progress { display: flex; align-items: center; gap: 8px; margin: 8px 0 0 }
+.steps-progress .sp-bar { flex: 1; height: 4px; background: #e3e6ea; border-radius: 99px; overflow: hidden }
+.steps-progress .sp-bar i { display: block; height: 100%; background: var(--ink-3); width: 0 }
+.steps-progress .sp-label { font-size: 11px; color: var(--ink-3); white-space: nowrap }
+
 /* ---------- view: timeline (default) ---------- */
-[data-view=bullets] .view-timeline { display: none }
-[data-view=timeline] .view-bullets { display: none }
+[data-view=timeline] .view-bullets, [data-view=timeline] .view-tree { display: none }
+[data-view=bullets] .view-timeline, [data-view=bullets] .view-tree { display: none }
+[data-view=tree] .view-timeline, [data-view=tree] .view-bullets { display: none }
 
 .timeline { position: relative; padding-left: 104px }
 .timeline::before {
@@ -195,6 +249,47 @@ dd a { color: var(--accent) }
 .blt ol b { font-weight: 600 }
 .blt ol .due { margin-left: auto }
 
+/* ---------- view: tech tree (ADR 0014) ---------- */
+.view-tree { display: flex; gap: 20px; align-items: flex-start }
+.tt-graph { flex: 1 1 auto; overflow-x: auto; padding: 10px 4px 30px }
+.tt-grid { position: relative }
+.tt-edges { position: absolute; inset: 0; pointer-events: none }
+.tt-edge { fill: none; stroke: var(--rule); stroke-width: 2; transition: opacity .15s, stroke .15s }
+.tt-edge.tt-lit { stroke: var(--accent); stroke-width: 2.5 }
+.tt-edge.tt-dim { opacity: .18 }
+
+.tt-node {
+  position: absolute; display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  padding: 8px 10px; border-radius: 6px; text-align: left; cursor: pointer; overflow: hidden;
+  background: var(--card); border: 2px solid var(--rule); color: var(--ink); font: inherit;
+  transition: opacity .15s, border-color .15s, box-shadow .15s, filter .15s;
+}
+/* ADR 0015: additive action-item fill, layered under the real is-done/available/locked
+   treatment above — hidden once the milestone is actually done, since that state already
+   has its own, more legible, green ring. Grayscale on purpose: never a done-state signal. */
+.tt-fill { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--ink-3) }
+.tt-node.is-done .tt-fill { display: none }
+.tt-node .tt-id {
+  font: 600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink-3);
+}
+.tt-node .tt-name {
+  font-size: 12.5px; font-weight: 600; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tt-node.is-done { border-color: var(--proj-rule); background: var(--proj-bg) }
+.tt-node.is-done .tt-id { color: var(--proj) }
+.tt-node.is-available { border-color: var(--proj-rule); box-shadow: 0 0 0 3px var(--proj-bg) }
+.tt-node.is-locked { border-color: var(--rule); border-style: dashed; filter: grayscale(1); opacity: .55 }
+.tt-node[aria-pressed=true] { box-shadow: 0 0 0 3px var(--accent) }
+.tt-node.tt-dim { opacity: .25; filter: grayscale(.6) }
+.tt-node.tt-lit { opacity: 1 }
+
+.tt-detail-wrap { flex: 0 0 320px; position: sticky; top: 16px }
+.tt-hint { color: var(--ink-3); font-size: 13px; padding: 20px 14px; border: 1px dashed var(--rule); border-radius: 6px }
+.tt-detail-wrap.has-selection .tt-hint { display: none }
+.tt-detail { display: none }
+.tt-detail.is-active { display: block }
+
 /* ---------- view switch ---------- */
 .switch {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 9;
@@ -218,6 +313,12 @@ dd a { color: var(--accent) }
   body { background: #fff }
   .wrap { padding: 0; max-width: none }
   .switch { display: none }
+  /* ADR 0014: the tech tree's fixed-pixel, horizontally-scrolling layout was never meant
+     to print. Without this, [data-view=tree] .view-timeline{display:none} (above) still
+     applies under print, and hiding .view-tree here too would print a BLANK page — so
+     force Timeline back on specifically when Tech Tree was the active screen view. */
+  [data-view=tree] .view-timeline { display: block }
+  [data-view=tree] .view-tree { display: none }
   .timeline { padding-left: 92px }
   .tl-date { left: -92px; width: 58px }
   .tl-month { margin-left: -92px; background: #fff }
@@ -229,6 +330,10 @@ dd a { color: var(--accent) }
   }
   /* ...but a tick already made must survive the print, so filled means done. */
   input[type=checkbox]:checked { background: var(--ink-3) }
+  /* ADR 0015: a printed page is a physical checklist — the Task layer's screen-only
+     density accommodation (collapsed by default) doesn't apply on paper. */
+  .tasks summary::before { content: "" }
+  .tasks ul { display: block !important }
 }
 
 /* ---------------------------------------------- ADR 0011: two hops + gap classes */

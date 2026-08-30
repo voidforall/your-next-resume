@@ -40,6 +40,15 @@ Use it when the plan needs an explanation: what a constraint cost, what you assu
 - **Learning:** Optional. Links or resource names.
 - **Completed:** —
 
+**Steps**
+
+- [ ] Work through the [PyTorch FSDP tutorial](https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html) end to end
+  - [ ] Read the tutorial's "How FSDP Works" section and sketch the sharding diagram from memory
+  - [ ] Run the tutorial's example script on a single GPU and confirm the baseline output
+- [ ] Get a 4-GPU box provisioned and confirm NCCL all-reduce works
+- [ ] Wrap the model in FSDP and get a training loop running without OOM
+- [x] Write the benchmark harness and the README teardown
+
 **Earns**
 
 - `P1` · *Projects* — Built and benchmarked a multi-GPU training harness on PyTorch FSDP.
@@ -61,7 +70,44 @@ Use it when the plan needs an explanation: what a constraint cost, what you assu
 | `Completed:` | yes | ISO date or `—` |
 
 Field lines are `- **Name:** value`. The bold, the colon **inside** the bold, and the leading
-`- ` all matter.
+`- ` all matter. `**Steps**` and `**Earns**` (below) are separate blocks, not table rows — each
+has its own heading line rather than a labelled field.
+
+### The `**Steps**` list (optional)
+
+```
+- [ ] Text of the action item, may include [a link](https://…) or `code`.
+- [x] Already done.
+```
+
+Same `[ ]`/`[x]` checkbox as the milestone's own `- [ ] done` line, one per action item, placed
+after the labelled fields and before `**Earns**`. Resources — a book, a video, a public repo — are
+just inline markdown inside the item's text; no separate field for them.
+
+This is the one optional block in a milestone: omit the whole `**Steps**` heading if there are no
+action items yet. A heading with zero items parsed under it fails `check-output.mjs`. A step's
+text must never be exactly `done` (any casing) — that exact string, checked, is what the milestone
+itself reads as done, from anywhere in the section.
+
+#### Nested Tasks (optional, one level)
+
+A Step can break down further into granular, roughly-hour-sized Tasks — same checkbox grammar,
+indented **exactly two spaces**:
+
+```
+- [ ] Work through the FSDP tutorial end to end
+  - [ ] Read the "How FSDP Works" section and sketch the sharding diagram
+  - [x] Run the example script on a single GPU and confirm the baseline
+```
+
+Once a Step has Tasks, its own `[ ]`/`[x]` bracket is no longer read for meaning — the Step's
+done-ness is *derived*: 100% of its Tasks done makes the Step done. A Step with zero Tasks is
+unaffected by any of this and behaves exactly as above. A checkbox-looking line indented by any
+amount other than exactly two spaces is a near-miss that silently fails to become a Task —
+`check-output.mjs` catches it and names the Step.
+
+Task completion (and Step completion derived from it) is a personal-progress convenience, never
+Evidence — it never substitutes for, or visually resembles, the milestone's own `- [x] done` line.
 
 ### The `**Earns**` list
 

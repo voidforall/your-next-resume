@@ -66,10 +66,18 @@ export const parseReachability = (body) => {
 export const gapClasses = () => [...GAP_CLASSES];
 
 /**
- * roadmap.md → { meta, milestones: [{ id, title, done, fields, earns }], reachability }
+ * roadmap.md → { meta, milestones: [{ id, title, done, fields, earns, steps, hasStepsHeading }], reachability }
  * `fields` keys are the labelled lines verbatim: Start, Due, Where, Deliverable,
  * Evidence, "Depends on", Learning, Completed.
  * `earns` entries are { id, kind: "projected"|"reframed"|"carried", section, text }.
+ * `steps` entries are { done, text, tasks, hasTaskIndentIssue }, taken from the block between an
+ * optional `**Steps**` heading and the next `**Earns**` heading (or end of section) — ADR 0013.
+ * `hasStepsHeading` is true whenever that heading exists, even if it parsed to zero steps — that
+ * distinction is what lets check-output.mjs catch a malformed block. `tasks` are { done, text }
+ * entries indented exactly two spaces under their Step — ADR 0015. A step's `done` is DERIVED
+ * from its tasks when it has any (100% done ⇒ done); its own bracket is only authoritative when
+ * it has zero tasks. `hasTaskIndentIssue` is true when a checkbox-looking line exists at some
+ * OTHER indent under the step — a near-miss that would otherwise silently fail to parse.
  */
 export const parseRoadmap = (text) => {
   const { meta, body } = splitFrontmatter(text);
@@ -90,6 +98,29 @@ export const parseRoadmap = (text) => {
         section: m[2].trim(),
         text: m[3].trim(),
       }));
+      const stepsSection = section.match(/\n\*\*Steps\*\*\s*\n([\s\S]*?)(?=\n\*\*Earns\*\*|\n## |$)/);
+      const stepMatches = stepsSection ? [...stepsSection[1].matchAll(/^- \[([ x])\] (.+)$/gm)] : [];
+      const steps = stepMatches.map((m, i) => {
+        const start = m.index + m[0].length;
+        const end = i + 1 < stepMatches.length ? stepMatches[i + 1].index : stepsSection[1].length;
+        const chunk = stepsSection[1].slice(start, end);
+        // ADR 0015: exact grammar is precisely two leading spaces.
+        const tasks = [...chunk.matchAll(/^ {2}- \[([ x])\] (.+)$/gm)].map((t) => ({
+          done: t[1] === "x",
+          text: t[2].trim(),
+        }));
+        // Diagnostic only: any checkbox-looking line at ANY indent. If this count differs
+        // from tasks.length, something was attempted at the wrong indent and silently
+        // failed to parse — check-output.mjs turns this into a loud failure.
+        const looseTaskLines = [...chunk.matchAll(/^[ \t]+- \[[ x]\] .+$/gm)].length;
+        return {
+          done: tasks.length > 0 ? tasks.every((t) => t.done) : m[1] === "x",
+          text: m[2].trim(),
+          tasks,
+          hasTaskIndentIssue: looseTaskLines !== tasks.length,
+        };
+      });
+      const hasStepsHeading = /\n\*\*Steps\*\*\s*\n/.test(section);
       return {
         id,
         title: title.trim(),
@@ -97,6 +128,8 @@ export const parseRoadmap = (text) => {
         dependsOn: parseDeps(fields["Depends on"]),
         fields,
         earns,
+        steps,
+        hasStepsHeading,
       };
     });
   const note = body.split(/\n(?=## )/).find((sec) => /^## Note\s*$/m.test(sec));

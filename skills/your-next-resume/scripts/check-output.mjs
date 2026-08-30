@@ -75,6 +75,15 @@ export function checkOutput(dir) {
     for (const dep of m.dependsOn)
       if (!ids.has(dep)) fail(at, `Depends on unknown milestone ${dep}`);
 
+    if (m.hasStepsHeading && m.steps.length === 0)
+      fail(at, "has a **Steps** heading but no steps parsed — check the `- [ ] text` / `- [x] text` checkbox grammar");
+    m.steps.forEach((step, si) => {
+      if (step.text.trim().toLowerCase() === "done")
+        fail(at, 'a Steps item\'s text must not be exactly "done" — it is indistinguishable from the milestone\'s own `- [x] done` line');
+      if (step.hasTaskIndentIssue)
+        fail(at, `Step ${si + 1} ("${step.text}") has a Task-like line that isn't indented by exactly two spaces — check the "  - [ ] text" / "  - [x] text" grammar`);
+    });
+
     if (m.earns.length === 0)
       fail(at, "earns no bullets — check the `- `P1` · *Section* — text` grammar (middle dot, em dash)");
 
